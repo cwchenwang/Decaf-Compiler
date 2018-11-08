@@ -1,0 +1,25 @@
+program
+    class Main <empty>
+        static func main voidtype
+            formals
+            stmtblock
+                vardef t inttype
+                assign
+                    varref t
+                    intconst 0
+                if
+                    gtr
+                        varref t
+                        intconst 0
+                    if
+                        les
+                            varref t
+                            intconst 0
+                        assign
+                            varref t
+                            neg
+                                intconst 1
+                    else
+                        assign
+                            varref t
+                            intconst 1
