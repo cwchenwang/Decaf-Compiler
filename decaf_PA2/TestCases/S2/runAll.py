@@ -14,17 +14,25 @@ import subprocess
 import sys
 
 def read_txt_file(filename):
-    with open(filename,'a+') as f:
+    with open(filename,'r') as f:
         txt = f.read().strip()
     # Python should be able to do it automatically, but just in case...
-    txt = txt.replace('\r','')
-    return txt
+    txt = txt.replace('\r','').split('\n')
+    result = []
+    for line in txt:
+        noc = line
+        if "Error at" in line:
+            noc = line[:line.index(',')] + line[line.index(')'):]
+        result.append(noc)
+    return '\n'.join(result)
 
 def main():
     decaf_jar = os.path.join('..', '..', 'result', 'decaf.jar')
-    names = sys.argv[1:]
-    if not names:
+    names = sys.argv[-1]
+    if '.py' in names:
         names = sorted(os.listdir('.'))
+    else:
+        names = [x for x in sorted(os.listdir('.')) if names in x]
     for name in names:
         bname,ext = os.path.splitext(name)
         if ext != '.decaf':
@@ -40,9 +48,8 @@ def main():
             info = 'OK :)'
         else:
             info = 'ERROR!'
-            print "actual\n", actual
-            print "expected\n", expected
-        print('{0:<20}{1}'.format(name,info))
+            # os.system('diff result/%s.result output/%s.result' % (bname, bname))
+        print('{0:<30}{1}'.format(name,info))
     if os.name == 'nt':
         print('Press Enter to continue...')
         try:
