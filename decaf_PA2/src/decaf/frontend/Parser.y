@@ -32,14 +32,23 @@ import java.util.*;
 %token IDENTIFIER	  AND    OR    STATIC  INSTANCEOF
 %token LESS_EQUAL   GREATER_EQUAL  EQUAL   NOT_EQUAL
 %token '+'  '-'  '*'  '/'  '%'  '='  '>'  '<'  '.'
-%token ','  ';'  '!'  '('  ')'  '['  ']'  '{'  '}'
+%token ','  ';'  '!'  '('  ')'  '['  ']'  '{'  '}' ':'
+%token SEALED
+%token SCOPY
+%token VAR
+%token IN
+%token KEYWORD
 
 %left OR
 %left AND 
+%left GUARD_SEP
 %nonassoc EQUAL NOT_EQUAL
 %nonassoc LESS_EQUAL GREATER_EQUAL '<' '>'
+%right ARRAYCONCAT
+%left  DOUBLEMO
 %left  '+' '-'
 %left  '*' '/' '%'  
+%nonassoc DEFAULT
 %nonassoc UMINUS '!' 
 %nonassoc '[' '.' 
 %nonassoc ')' EMPTY
@@ -102,9 +111,13 @@ Type            :	INT
 
 ClassDef        :	CLASS IDENTIFIER ExtendsClause '{' FieldList '}'
 					{
-						$$.cdef = new Tree.ClassDef($2.ident, $3.ident, $5.flist, $1.loc);
+						$$.cdef = new Tree.ClassDef(false,$2.ident, $3.ident, $5.flist, $1.loc);
 					}
-                ;
+                |	SEALED CLASS IDENTIFIER ExtendsClause '{' FieldList '}'
+					{
+						$$.cdef = new Tree.ClassDef(true, $3.ident, $4.ident, $6.flist, $1.loc);
+					}
+				;
 
 ExtendsClause	:	EXTENDS IDENTIFIER
 					{
@@ -195,7 +208,30 @@ Stmt		    :	VariableDef
                 |	PrintStmt ';'
                 |	BreakStmt ';'
                 |	StmtBlock
+				|	OCStmt ';'
+				|	GuardedStmt
+				|	ForeachStmt
                 ;
+
+ForeachStmt		:	FOREACH '(' BoundedVariable IN Expr ')' Stmt
+					{
+						$$.stmt = new Tree.Foreach($3.stmt, $5.expr, $7.stmt, $1.loc);
+					}
+				|	FOREACH '(' BoundedVariable IN Expr WHILE Expr ')' Stmt
+					{
+						$$.stmt = new Tree.Foreach($3.stmt, $5.expr, $7.expr, $9.stmt, $1.loc);
+					}	
+				;
+		
+BoundedVariable	:	VAR IDENTIFIER
+					{
+						$$.stmt = new BoundedVariable($2.ident, $1.loc);
+					}
+				|	Type IDENTIFIER
+					{
+						$$.stmt = new BoundedVariable($1.type, $2.ident, $1.loc);
+					}
+				;
 
 SimpleStmt      :	LValue '=' Expr
 					{
@@ -218,7 +254,11 @@ Receiver     	:	Expr '.'
                 	}
                 ; 
 
-LValue          :	Receiver IDENTIFIER
+LValue          :	VAR IDENTIFIER
+					{
+						$$.lvalue = new Tree.Ident($2.ident, $2.loc);
+					}
+				|	Receiver IDENTIFIER
 					{
 						$$.lvalue = new Tree.Ident($1.expr, $2.ident, $2.loc);
 						if ($1.loc == null) {
@@ -338,6 +378,30 @@ Expr            :	LValue
                 	{
                 		$$.expr = new Tree.TypeCast($3.ident, $5.expr, $5.loc);
                 	} 
+				|	Expr DOUBLEMO Expr
+					{
+						$$.expr = new Tree.ArrayRepeat($1.expr, $3.expr, $2.loc);
+					}
+				|	Expr ARRAYCONCAT Expr
+					{
+						$$.expr = new Tree.ArrayConcat($1.expr, $3.expr, $2.loc);
+					}
+				|	Expr '[' Expr ':' Expr ']'
+					{
+						$$.expr = new Tree.Range($1.expr, $3.expr, $5.expr, $2.loc);
+					}
+				|	Expr '[' Expr ']' DEFAULT Expr
+					{
+						$$.expr = new Tree.Default($1.expr, $3.expr, $6.expr, $2.loc);
+					} 
+				|	'[' Expr FOR IDENTIFIER IN Expr ']'
+					{
+						$$.expr = new Tree.Comprehension($2.expr, $6.expr, null, $4.ident, $2.loc);
+					}
+				|	'[' Expr FOR IDENTIFIER IN Expr IF Expr ']'
+					{
+						$$.expr = new Tree.Comprehension($2.expr, $6.expr, $8.expr, $4.ident, $2.loc);
+					}
                 ;
 	
 Constant        :	LITERAL
@@ -348,7 +412,26 @@ Constant        :	LITERAL
                 	{
 						$$.expr = new Null($1.loc);
 					}
+				|	'[' ']'
+					{
+						$$.expr = new ArrayConstant(null, $1.loc);
+					}
+				|	'['	ConstantArray ']'
+					{
+						$$.expr = new ArrayConstant($2.elist, $1.loc);
+					}
                 ;
+
+ConstantArray	:	ConstantArray ',' Constant
+					{
+						$$.elist.add($3.expr);
+					}
+				|	Constant
+					{
+						$$.elist = new ArrayList<Tree.Expr>();
+						$$.elist.add($1.expr);
+					}
+				;
 
 Actuals         :	ExprList
                 |	/* empty */
@@ -368,7 +451,13 @@ ExprList        :	ExprList ',' Expr
 						$$.elist.add($1.expr);
                 	}
                 ;
-    
+
+OCStmt			:	SCOPY '(' IDENTIFIER ',' Expr ')'
+					{
+						$$.stmt = new Tree.Scopy($5.expr, $1.loc, $3.ident);
+					}
+				;
+
 WhileStmt       :	WHILE '(' Expr ')' Stmt
 					{
 						$$.stmt = new Tree.WhileLoop($3.expr, $5.stmt, $1.loc);
@@ -392,6 +481,33 @@ IfStmt          :	IF '(' Expr ')' Stmt ElseClause
 						$$.stmt = new Tree.If($3.expr, $5.stmt, $6.stmt, $1.loc);
 					}
                 ;
+
+GuardedStmt		:	IF '{'	'}'
+					{
+						$$.stmt = new Tree.Guarded(null, $1.loc);
+					}
+				|	IF '{' IfBranch '}'
+					{
+						$$.stmt = new Tree.Guarded($3.slist, $1.loc);
+					}
+				;
+
+IfBranch		:	IfBranch GUARD_SEP IfSubStmt
+					{
+						$$.slist.add($3.stmt);
+					}
+				|	IfSubStmt
+					{
+						$$.slist = new ArrayList<Tree>();
+						$$.slist.add($1.stmt);
+					}
+				;
+
+IfSubStmt		:	Expr ':' Stmt
+					{
+						$$.stmt = new Tree.IfSub($1.expr, $3.stmt, $1.loc);
+					}
+				;
 
 ElseClause      :	ELSE Stmt
 					{
