@@ -7,6 +7,7 @@ import java.util.Stack;
 import decaf.Driver;
 import decaf.Location;
 import decaf.tree.Tree;
+import decaf.error.*;
 import decaf.error.BadArgCountError;
 import decaf.error.BadArgTypeError;
 import decaf.error.BadArrElementError;
@@ -571,6 +572,27 @@ public class TypeCheck extends Tree.Visitor {
 			typeArray.type = new ArrayType(typeArray.elementType.type);
 		}
 	}
+
+	//wc added
+	@Override
+	public void visitScopy(Tree.Scopy scopy) {
+		Symbol sym = table.lookup(scopy.ident, true);
+		if(sym != null) {
+			scopy.expr.accept(this);
+			if(!sym.getType().isClassType()) { //不是class，先报错再检查E
+				issueError(new BadScopyArgError(scopy.identLoc, "dst", sym.getType().toString()));
+				if(!scopy.expr.type.isClassType()) {
+					issueError(new BadScopyArgError(scopy.exprLoc, "src", scopy.expr.type.toString()));
+				}
+			} else if(!sym.getType().compatible(scopy.expr.type)) { //是class类型，判断src和dst是否同类型
+				issueError(new BadScopySrcError(scopy.exprLoc, sym.getType().toString(), scopy.expr.type.toString()));
+			}
+		} else { //没有定义
+			issueError(new UndeclVarError(scopy.identLoc, scopy.ident));
+			scopy.type = BaseType.ERROR;
+		}
+	}
+	//wc add ended
 
 	private void issueError(DecafError error) {
 		Driver.getDriver().issueError(error);

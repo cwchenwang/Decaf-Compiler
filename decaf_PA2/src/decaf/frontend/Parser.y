@@ -454,7 +454,7 @@ ExprList        :	ExprList ',' Expr
 
 OCStmt			:	SCOPY '(' IDENTIFIER ',' Expr ')'
 					{
-						$$.stmt = new Tree.Scopy($5.expr, $1.loc, $3.ident);
+						$$.stmt = new Tree.Scopy($5.expr, $3.ident, $1.loc, $3.loc, $5.loc);
 					}
 				;
 
