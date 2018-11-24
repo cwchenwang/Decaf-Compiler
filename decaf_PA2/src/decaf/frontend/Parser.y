@@ -482,13 +482,13 @@ IfStmt          :	IF '(' Expr ')' Stmt ElseClause
 					}
                 ;
 
-GuardedStmt		:	IF '{'	'}'
-					{
-						$$.stmt = new Tree.Guarded(null, $1.loc);
-					}
-				|	IF '{' IfBranch '}'
+GuardedStmt		:	IF '{' IfBranch '}'
 					{
 						$$.stmt = new Tree.Guarded($3.slist, $1.loc);
+					}
+				|	IF '{'	'}'
+					{
+						$$.stmt = new Tree.Guarded(null, $1.loc);
 					}
 				;
 

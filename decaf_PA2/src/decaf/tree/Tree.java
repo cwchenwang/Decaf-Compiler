@@ -1751,38 +1751,38 @@ public abstract class Tree {
         }
 
         public void visitGuarded(Guarded that) {
-            visitGuarded(that);
+            visitTree(that);
         }
 
         public void visitForeach(Foreach that) {
-            visitForeach(that);
+            visitTree(that);
         }
 
         public void visitBoundedVariable(BoundedVariable that) {
-            visitBoundedVariable(that);
+            visitTree(that);
         }
         public void visitArrayRepeat(ArrayRepeat that) {
-            visitArrayRepeat(that);
+            visitTree(that);
         }
 
         public void visitArrayConcat(ArrayConcat that) {
-            visitArrayConcat(that);
+            visitTree(that);
         }
 
         public void visitRange(Range that) {
-            visitRange(that);
+            visitTree(that);
         }
 
         public void visitDefault(Default that) {
-            visitDefault(that);
+            visitTree(that);
         }
 
         public void visitArrayConstant(ArrayConstant that) {
-            visitArrayConstant(that);
+            visitTree(that);
         }
 
         public void visitComprehension(Comprehension that) {
-            visitComprehension(that);
+            visitTree(that);
         }
         //wc add ended
 

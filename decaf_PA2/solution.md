@@ -8,5 +8,8 @@
 - 修改了`BuildSym.java`：在visitClassDef中设置进行判断，设置sealed为true或false
 - 修改了`TypeCheck.java`：在visitClassDef中进行判断，如果父亲是sealed，报错
 
+3. 支持串行条件卫士
+- 修改了`BuildSym.java`：增加了visitGuarded，遍历整个列表，增加了visitIfSub，对某个表达式的类型进行判断
+
 4.
 - `BaseType.java`中添加UNKNOWN基本类型

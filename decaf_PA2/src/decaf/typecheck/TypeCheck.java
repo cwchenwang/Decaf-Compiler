@@ -573,6 +573,24 @@ public class TypeCheck extends Tree.Visitor {
 			scopy.type = BaseType.ERROR;
 		}
 	}
+
+	@Override
+	public void visitGuarded(Tree.Guarded guarded) {
+		int s = guarded.conditions.size();
+		if(s > 0) {
+			for(int i = 0; i < s; i++) {
+				guarded.conditions.get(i).accept(this);
+			}
+		}
+	}
+
+	@Override
+	public void visitIfSub(Tree.IfSub ifSub) {
+		ifSub.condition.accept(this);
+		if(!ifSub.condition.type.equal(BaseType.BOOL)) {
+			issueError(new BadTestExpr(ifSub.loc));
+		}
+	}
 	//wc add ended
 
 	private void issueError(DecafError error) {
