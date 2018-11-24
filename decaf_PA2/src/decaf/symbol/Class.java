@@ -22,6 +22,8 @@ public class Class extends Symbol {
 
 	private int size;
 
+	public boolean sealed;
+
 	public int getSize() {
 		return size;
 	}

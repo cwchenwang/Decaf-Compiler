@@ -99,6 +99,11 @@ public class BuildSym extends Tree.Visitor {
 		for (Tree f : classDef.fields) {
 			f.accept(this);
 		}
+		if(classDef.sealed == true) {
+			classDef.symbol.sealed = true;
+		} else {
+			classDef.symbol.sealed = false;
+		}
 		table.close();
 	}
 

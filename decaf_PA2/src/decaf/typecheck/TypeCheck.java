@@ -8,30 +8,6 @@ import decaf.Driver;
 import decaf.Location;
 import decaf.tree.Tree;
 import decaf.error.*;
-import decaf.error.BadArgCountError;
-import decaf.error.BadArgTypeError;
-import decaf.error.BadArrElementError;
-import decaf.error.BadLengthArgError;
-import decaf.error.BadLengthError;
-import decaf.error.BadNewArrayLength;
-import decaf.error.BadPrintArgError;
-import decaf.error.BadReturnTypeError;
-import decaf.error.BadTestExpr;
-import decaf.error.BreakOutOfLoopError;
-import decaf.error.ClassNotFoundError;
-import decaf.error.DecafError;
-import decaf.error.FieldNotAccessError;
-import decaf.error.FieldNotFoundError;
-import decaf.error.IncompatBinOpError;
-import decaf.error.IncompatUnOpError;
-import decaf.error.NotArrayError;
-import decaf.error.NotClassError;
-import decaf.error.NotClassFieldError;
-import decaf.error.NotClassMethodError;
-import decaf.error.RefNonStaticError;
-import decaf.error.SubNotIntError;
-import decaf.error.ThisInStaticFuncError;
-import decaf.error.UndeclVarError;
 import decaf.frontend.Parser;
 import decaf.scope.ClassScope;
 import decaf.scope.FormalScope;
@@ -406,6 +382,11 @@ public class TypeCheck extends Tree.Visitor {
 		table.open(classDef.symbol.getAssociatedScope());
 		for (Tree f : classDef.fields) {
 			f.accept(this);
+		}
+		if(classDef.symbol.getParent() != null) {
+			if(classDef.symbol.getParent().sealed) {
+				issueError(new BadSealedInherError(classDef.loc));
+			}
 		}
 		table.close();
 	}
