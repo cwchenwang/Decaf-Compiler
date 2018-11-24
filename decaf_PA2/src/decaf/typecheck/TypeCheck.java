@@ -305,7 +305,8 @@ public class TypeCheck extends Tree.Visitor {
 			Symbol v = table.lookupBeforeLocation(ident.name, ident
 					.getLocation());
 			if(ident.isVar) {
-				ident.type = BaseType.UNKNOWN;
+				if(ident.type == null)
+					ident.type = BaseType.UNKNOWN;
 				return;
 			} else if (v == null) {
 				issueError(new UndeclVarError(ident.getLocation(), ident.name));
@@ -611,28 +612,31 @@ public class TypeCheck extends Tree.Visitor {
 	}
 
 	@Override
-	public void visitArrayRepeat(Tree.ArrayRepeat initial) {
-		initial.expr1.accept(this);
-		initial.expr2.accept(this);
-		if(initial.expr1.type == null) {
-			initial.expr1.type = BaseType.UNKNOWN;
+	public void visitArrayRepeat(Tree.ArrayRepeat arrRepeat) {
+		arrRepeat.expr1.accept(this);
+		arrRepeat.expr2.accept(this);
+		if(arrRepeat.expr1.type == null) {
+			arrRepeat.expr1.type = BaseType.UNKNOWN;
 		}
-		if(initial.expr2.type == null) {
-			initial.expr2.type = BaseType.UNKNOWN;
-		}
-
-		if(initial.expr1.type.equal(BaseType.VOID) || initial.expr1.type.equal(BaseType.UNKNOWN)) {
-			initial.type = BaseType.ERROR;
-			issueError(new BadArrElementError(initial.loc1));
-		} else {
-			initial.type = new ArrayType(initial.expr1.type);
+		if(arrRepeat.expr2.type == null) {
+			arrRepeat.expr2.type = BaseType.UNKNOWN;
 		}
 
-		if(!initial.expr2.type.equal(BaseType.INT)) {
-			issueError(new BadArrTimesError(initial.loc2));
-			initial.type = BaseType.ERROR;
+		boolean errorAppear = false;
+		if(arrRepeat.expr1.type.equal(BaseType.VOID) || arrRepeat.expr1.type.equal(BaseType.UNKNOWN)) {
+			arrRepeat.type = BaseType.ERROR;
+			issueError(new BadArrElementError(arrRepeat.getLocation()));
+			errorAppear = true;
+		} else if(!arrRepeat.expr2.type.equal(BaseType.INT)) {
+			issueError(new BadArrTimesError(arrRepeat.loc2));
+			arrRepeat.type = BaseType.ERROR;
+			errorAppear = true;
+		}
+
+		if(errorAppear) {
+			arrRepeat.type = BaseType.ERROR;
 		} else {
-			initial.type = new ArrayType(initial.expr1.type);
+			arrRepeat.type = new ArrayType(arrRepeat.expr1.type);
 		}
 	}
 	//wc add ended
