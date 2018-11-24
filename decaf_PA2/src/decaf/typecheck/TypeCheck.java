@@ -639,6 +639,43 @@ public class TypeCheck extends Tree.Visitor {
 			arrRepeat.type = new ArrayType(arrRepeat.expr1.type);
 		}
 	}
+
+	@Override
+	public void visitDefault(Tree.Default arrDefault) {
+		arrDefault.expr1.accept(this);
+		arrDefault.expr2.accept(this);
+		arrDefault.expr3.accept(this);
+		if(arrDefault.expr1.type == null) {
+			arrDefault.expr1.type = BaseType.UNKNOWN;
+		}
+		if(arrDefault.expr2.type == null) {
+			arrDefault.expr2.type = BaseType.UNKNOWN;
+		}
+		if(arrDefault.expr3.type == null) {
+			arrDefault.expr3.type = BaseType.UNKNOWN;
+		}
+		
+		if(arrDefault.expr1.type.isArrayType()) { //E是数组类型
+			Type eType = ((ArrayType)arrDefault.expr1.type).getElementType();
+			if(!eType.equal(BaseType.ERROR)) {
+				if(!arrDefault.expr2.type.equal(BaseType.INT)) {
+					issueError(new BadArrIndexError(arrDefault.loc));
+				}
+
+				if(!eType.equal(arrDefault.expr3.type)) { //E和E'类型不同
+					issueError(new BadDefError(arrDefault.loc, eType.toString(), arrDefault.expr3.type.toString()));
+				}
+				arrDefault.type = eType;
+			}
+		} else { //E不是数组类型
+			issueError(new BadArrOperArgError(arrDefault.getLocation()));
+			if(!(arrDefault.expr3.type.equal(BaseType.UNKNOWN) || arrDefault.expr3.type.equal(BaseType.VOID))) { //E'是合法的数组元素
+				arrDefault.type = arrDefault.expr3.type;
+			} else { //E'不合法
+				arrDefault.type = BaseType.ERROR;
+			}
+		}
+	}
 	//wc add ended
 
 	private void issueError(DecafError error) {
