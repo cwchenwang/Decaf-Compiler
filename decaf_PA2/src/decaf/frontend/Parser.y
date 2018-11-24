@@ -380,7 +380,7 @@ Expr            :	LValue
                 	} 
 				|	Expr DOUBLEMO Expr
 					{
-						$$.expr = new Tree.ArrayRepeat($1.expr, $3.expr, $2.loc);
+						$$.expr = new Tree.ArrayRepeat($1.expr, $3.expr, $2.loc, $1.loc, $3.loc);
 					}
 				|	Expr ARRAYCONCAT Expr
 					{

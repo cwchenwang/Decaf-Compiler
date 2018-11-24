@@ -304,7 +304,10 @@ public class TypeCheck extends Tree.Visitor {
 		if (ident.owner == null) {
 			Symbol v = table.lookupBeforeLocation(ident.name, ident
 					.getLocation());
-			if (v == null) {
+			if(ident.isVar) {
+				ident.type = BaseType.UNKNOWN;
+				return;
+			} else if (v == null) {
 				issueError(new UndeclVarError(ident.getLocation(), ident.name));
 				ident.type = BaseType.ERROR;
 			} else if (v.isVariable()) {
@@ -421,6 +424,21 @@ public class TypeCheck extends Tree.Visitor {
 	public void visitAssign(Tree.Assign assign) {
 		assign.left.accept(this);
 		assign.expr.accept(this);
+
+		if(assign.left.type == null) {
+			assign.left.type = BaseType.UNKNOWN;
+		}
+		if(assign.expr.type == null) {
+			assign.expr.type = BaseType.UNKNOWN;
+		}
+
+		if(assign.left.type.equal(BaseType.UNKNOWN)) {
+			assign.left.type = assign.expr.type;
+			Tree.Ident var = (Tree.Ident)assign.left;
+
+			table.declare(new Variable(var.name, assign.expr.type, var.getLocation()));
+		}
+
 		if (!assign.left.type.equal(BaseType.ERROR)
 				&& (assign.left.type.isFuncType() || !assign.expr.type
 						.compatible(assign.left.type))) {
@@ -589,6 +607,32 @@ public class TypeCheck extends Tree.Visitor {
 		ifSub.condition.accept(this);
 		if(!ifSub.condition.type.equal(BaseType.BOOL)) {
 			issueError(new BadTestExpr(ifSub.loc));
+		}
+	}
+
+	@Override
+	public void visitArrayRepeat(Tree.ArrayRepeat initial) {
+		initial.expr1.accept(this);
+		initial.expr2.accept(this);
+		if(initial.expr1.type == null) {
+			initial.expr1.type = BaseType.UNKNOWN;
+		}
+		if(initial.expr2.type == null) {
+			initial.expr2.type = BaseType.UNKNOWN;
+		}
+
+		if(initial.expr1.type.equal(BaseType.VOID) || initial.expr1.type.equal(BaseType.UNKNOWN)) {
+			initial.type = BaseType.ERROR;
+			issueError(new BadArrElementError(initial.loc1));
+		} else {
+			initial.type = new ArrayType(initial.expr1.type);
+		}
+
+		if(!initial.expr2.type.equal(BaseType.INT)) {
+			issueError(new BadArrTimesError(initial.loc2));
+			initial.type = BaseType.ERROR;
+		} else {
+			initial.type = new ArrayType(initial.expr1.type);
 		}
 	}
 	//wc add ended

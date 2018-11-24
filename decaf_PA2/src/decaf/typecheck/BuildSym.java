@@ -165,6 +165,40 @@ public class BuildSym extends Tree.Visitor {
 		table.close();
 	}
 
+	@Override
+	public void visitAssign(Tree.Assign assign) {
+		assign.left.accept(this);
+		assign.expr.accept(this);
+		if(assign.left.type == BaseType.UNKNOWN) {
+			Tree.Ident var = (Tree.Ident)assign.left;
+
+			Symbol symbol = table.lookup(var.name, true);
+			Variable variable = new Variable(var.name, BaseType.UNKNOWN, var.getLocation());
+
+			if (symbol != null) {
+				if (table.getCurrentScope().equals(symbol.getScope())) {
+					issueError(new DeclConflictError(variable.getLocation(), variable.getName(),
+						symbol.getLocation()));
+				} else if ((symbol.getScope().isFormalScope() && table.getCurrentScope().isLocalScope() && ((LocalScope)table.getCurrentScope()).isCombinedtoFormal() )) {
+					issueError(new DeclConflictError(variable.getLocation(), variable.getName(),
+						symbol.getLocation()));
+				} else {
+					table.declare(variable);
+				}
+			} else {
+				table.declare(variable);
+			}
+			var.symbol = variable;
+		}
+	}
+
+	@Override
+	public void visitIdent(Tree.Ident ident) {
+		if(ident.isVar == true) {
+			ident.type = BaseType.UNKNOWN;
+		}
+	}
+
 	// visiting types
 	@Override
 	public void visitTypeIdent(Tree.TypeIdent type) {

@@ -1003,9 +1003,9 @@ public abstract class Tree {
     		LOCAL_VAR, PARAM_VAR, MEMBER_VAR, ARRAY_ELEMENT
     	}
     	public Kind lvKind;
-    	
+    	public boolean isVar = false;
     	LValue(int tag, Location loc) {
-    		super(tag, loc);
+            super(tag, loc);
     	}
     }
 
@@ -1303,12 +1303,15 @@ public abstract class Tree {
 
     public static class ArrayRepeat extends Expr {
     	
-    	public Expr expr1, expr2;
+        public Expr expr1, expr2;
+        public Location loc1, loc2;
 
-        public ArrayRepeat(Expr expr1, Expr expr2, Location loc) {
+        public ArrayRepeat(Expr expr1, Expr expr2, Location loc, Location loc1, Location loc2) {
             super(ARRAYREPEAT, loc);
             this.expr1 = expr1;
             this.expr2 = expr2;
+            this.loc1 = loc1;
+            this.loc2 = loc2;
         }
 
     	@Override
@@ -1484,7 +1487,7 @@ public abstract class Tree {
         public String name;
         public Variable symbol;
         public boolean isDefined;
-        public boolean isVar = false;
+        // public boolean isVar = false;
 
         public Ident(Expr owner, String name, Location loc) {
             super(IDENT, loc);
