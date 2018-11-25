@@ -173,7 +173,6 @@ public class BuildSym extends Tree.Visitor {
 		assign.expr.accept(this);
 		if(assign.left.type == BaseType.UNKNOWN) {
 			Tree.Ident varDef = (Tree.Ident)assign.left;
-			Symbol symbol = table.lookup(varDef.name, true);
 			Variable v = new Variable(varDef.name, BaseType.UNKNOWN, 
 				varDef.getLocation());
 			Symbol sym = table.lookup(varDef.name, true);

@@ -433,11 +433,13 @@ public class TypeCheck extends Tree.Visitor {
 			assign.expr.type = BaseType.UNKNOWN;
 		}
 
+		//类型推导
 		if(assign.left.type.equal(BaseType.UNKNOWN)) {
 			assign.left.type = assign.expr.type;
 			Tree.Ident var = (Tree.Ident)assign.left;
 
-			table.declare(new Variable(var.name, assign.expr.type, var.getLocation()));
+			Variable variable = (Variable)table.lookup(var.name, true);
+			variable.setType(assign.left.type);
 		}
 
 		if (!assign.left.type.equal(BaseType.ERROR)
@@ -728,7 +730,7 @@ public class TypeCheck extends Tree.Visitor {
 				bvar.type = ((ArrayType)foreach.expr1.type).getElementType();
 			}
 		} else { //如果是Type x...
-			if(!bvar.type.compatible(foreach.expr1.type)) {
+			if(!bvar.type.compatible(((ArrayType)foreach.expr1.type).getElementType())) {
 				issueError(new BadForeachTypeError(foreach.expr1.loc, bvar.type.toString(), ((ArrayType)foreach.expr1.type).getElementType().toString()));
 			}
 		}
