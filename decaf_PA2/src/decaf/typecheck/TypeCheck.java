@@ -606,7 +606,7 @@ public class TypeCheck extends Tree.Visitor {
 	@Override
 	public void visitIfSub(Tree.IfSub ifSub) {
 		ifSub.condition.accept(this);
-		if(!ifSub.condition.type.equal(BaseType.BOOL)) {
+		if(!ifSub.condition.type.compatible(BaseType.BOOL)) {
 			issueError(new BadTestExpr(ifSub.loc));
 		}
 	}
@@ -661,7 +661,6 @@ public class TypeCheck extends Tree.Visitor {
 				if(!arrDefault.expr2.type.equal(BaseType.INT)) {
 					issueError(new BadArrIndexError(arrDefault.loc));
 				}
-
 				if(!eType.equal(arrDefault.expr3.type)) { //E和E'类型不同
 					issueError(new BadDefError(arrDefault.loc, eType.toString(), arrDefault.expr3.type.toString()));
 				}
@@ -675,6 +674,69 @@ public class TypeCheck extends Tree.Visitor {
 				arrDefault.type = BaseType.ERROR;
 			}
 		}
+	}
+
+	@Override
+	public void visitForeach(Tree.Foreach foreach) {
+		foreach.stmt1.accept(this);
+		foreach.expr1.accept(this);
+		if(foreach.expr2 != null) {
+			foreach.expr2.accept(this);
+		}
+		if(foreach.stmt1.type == null) {
+			foreach.stmt1.type = BaseType.UNKNOWN;
+		}
+		if(foreach.expr1.type == null) {
+			foreach.expr1.type = BaseType.UNKNOWN;
+		}
+		if(foreach.expr2 != null && foreach.expr2.type == null) {
+			foreach.expr2.type = BaseType.UNKNOWN;
+		}
+		if(foreach.stmt2.type == null) {
+			foreach.stmt2.type = BaseType.UNKNOWN;
+		}
+
+		if(foreach.expr2 != null) {
+			// System.out.println(foreach.expr2.type.toString());
+			if(!foreach.expr2.type.compatible(BaseType.BOOL)) {
+				issueError(new BadTestExpr(foreach.expr2.getLocation()));
+				foreach.expr2.type = BaseType.ERROR;
+			}
+		}
+
+		Tree.Block block = (Tree.Block)foreach.stmt2;
+		table.open(block.associatedScope);
+
+		Tree.BoundedVariable bvar = (Tree.BoundedVariable)foreach.stmt1;
+		Variable variable = (Variable)table.lookup(bvar.name, true);
+
+		if(bvar.type == BaseType.UNKNOWN) { //如果是var x...
+			if(foreach.expr1.type.equal(BaseType.ERROR)) {
+				bvar.type = BaseType.ERROR;
+				variable.setType(BaseType.ERROR);
+				table.close();
+				return;
+			}
+			if(!foreach.expr1.type.isArrayType()) {
+				issueError(new BadArrOperArgError(foreach.expr1.getLocation()));
+				bvar.type = BaseType.ERROR;
+				variable.setType(BaseType.ERROR);
+				table.close();
+				return;
+			}
+			else {
+				bvar.type = ((ArrayType)foreach.expr1.type).getElementType();
+			}
+		} else { //如果是Type x...
+			if(!bvar.type.compatible(foreach.expr1.type)) {
+				issueError(new BadForeachTypeError(foreach.expr1.loc, bvar.type.toString(), ((ArrayType)foreach.expr1.type).getElementType().toString()));
+			}
+		}
+		variable.setType(bvar.type);
+		for (Tree s : block.block) {
+			s.accept(this);
+		}
+		table.close();
 	}
 	//wc add ended
 

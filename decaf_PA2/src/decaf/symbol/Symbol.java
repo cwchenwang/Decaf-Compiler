@@ -63,6 +63,10 @@ public abstract class Symbol {
 		return type;
 	}
 
+	public void setType(Type t) {
+		this.type = t;
+	}
+	
 	public String getName() {
 		return name;
 	}

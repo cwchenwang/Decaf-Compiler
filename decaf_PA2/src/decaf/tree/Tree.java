@@ -861,13 +861,18 @@ public abstract class Tree {
 
     public static class BoundedVariable extends Tree {
 
-        public TypeLiteral type;
+        public TypeLiteral inType;
         public String name;
 
         public BoundedVariable(TypeLiteral type, String name, Location loc) {
             super(BOUNDEDVARIABLE, loc);
             this.name = name;
-            this.type = type;
+            this.inType = type;
+            if(this.inType != null) {
+                this.type = inType.type;
+            } else { //var 
+                this.type = null;
+            }
         }
 
         public BoundedVariable(String name, Location loc) {
@@ -882,8 +887,8 @@ public abstract class Tree {
         @Override
     	public void printTo(IndentPrintWriter pw) {
             pw.print("varbind " + name + " ");
-            if(type != null) {
-                type.printTo(pw);
+            if(inType != null) {
+                inType.printTo(pw);
                 pw.println();
             } else {
                 pw.println("var");

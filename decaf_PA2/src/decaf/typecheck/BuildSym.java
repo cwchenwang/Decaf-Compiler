@@ -1,6 +1,8 @@
 package decaf.typecheck;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
 
 import decaf.Driver;
 import decaf.tree.Tree;
@@ -170,25 +172,25 @@ public class BuildSym extends Tree.Visitor {
 		assign.left.accept(this);
 		assign.expr.accept(this);
 		if(assign.left.type == BaseType.UNKNOWN) {
-			Tree.Ident var = (Tree.Ident)assign.left;
-
-			Symbol symbol = table.lookup(var.name, true);
-			Variable variable = new Variable(var.name, BaseType.UNKNOWN, var.getLocation());
-
-			if (symbol != null) {
-				if (table.getCurrentScope().equals(symbol.getScope())) {
-					issueError(new DeclConflictError(variable.getLocation(), variable.getName(),
-						symbol.getLocation()));
-				} else if ((symbol.getScope().isFormalScope() && table.getCurrentScope().isLocalScope() && ((LocalScope)table.getCurrentScope()).isCombinedtoFormal() )) {
-					issueError(new DeclConflictError(variable.getLocation(), variable.getName(),
-						symbol.getLocation()));
+			Tree.Ident varDef = (Tree.Ident)assign.left;
+			Symbol symbol = table.lookup(varDef.name, true);
+			Variable v = new Variable(varDef.name, BaseType.UNKNOWN, 
+				varDef.getLocation());
+			Symbol sym = table.lookup(varDef.name, true);
+			if (sym != null) {
+				if (table.getCurrentScope().equals(sym.getScope())) {
+					issueError(new DeclConflictError(v.getLocation(), v.getName(),
+							sym.getLocation()));
+				} else if ((sym.getScope().isFormalScope() && table.getCurrentScope().isLocalScope() && ((LocalScope)table.getCurrentScope()).isCombinedtoFormal() )) {
+					issueError(new DeclConflictError(v.getLocation(), v.getName(),
+							sym.getLocation()));
 				} else {
-					table.declare(variable);
+					table.declare(v);
 				}
 			} else {
-				table.declare(variable);
+				table.declare(v);
 			}
-			var.symbol = variable;
+			varDef.symbol = v;
 		}
 	}
 
@@ -197,6 +199,40 @@ public class BuildSym extends Tree.Visitor {
 		if(ident.isVar == true) {
 			ident.type = BaseType.UNKNOWN;
 		}
+	}
+
+	@Override
+	public void visitBoundedVariable(Tree.BoundedVariable bvar) {
+		if(bvar.inType == null) //为var
+			bvar.type = BaseType.UNKNOWN;
+	}
+
+	@Override
+	public void visitForeach(Tree.Foreach foreach) {
+		foreach.stmt1.accept(this);
+		foreach.expr1.accept(this);
+		if(foreach.expr2 != null) { //有while部分
+			foreach.expr2.accept(this);
+		}
+		
+		Tree.Block block;
+		if(foreach.stmt2 instanceof Tree.Block) { //如果是一个block 
+			block = (Tree.Block)foreach.stmt2;
+		} else { //如果不是新建一个block
+			List<Tree> blockList = new ArrayList<Tree>();
+			blockList.add(foreach.stmt2);
+			block = new Tree.Block(blockList, foreach.stmt2.loc);
+			foreach.stmt2 = block;
+		}
+		block.associatedScope = new LocalScope(block);
+		table.open(block.associatedScope);
+		Tree.BoundedVariable bvar = (Tree.BoundedVariable)foreach.stmt1;
+		Variable variable = new Variable(bvar.name, bvar.type, bvar.getLocation());
+		table.declare(variable);
+		for (Tree s : block.block) {
+			s.accept(this);
+		}
+		table.close();
 	}
 
 	// visiting types
