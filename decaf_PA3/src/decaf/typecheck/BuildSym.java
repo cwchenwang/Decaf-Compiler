@@ -163,11 +163,7 @@ public class BuildSym extends Tree.Visitor {
 
 	@Override
 	public void visitAssign(Tree.Assign assign) {
-		if(assign.left != null) {
-			assign.left.accept(this);
-			// System.out.println("visiting ident0");
-		}
-
+		assign.left.accept(this);
 		assign.expr.accept(this);
 		if(assign.left.type == BaseType.UNKNOWN) {
 			Tree.Ident varDef = (Tree.Ident)assign.left;

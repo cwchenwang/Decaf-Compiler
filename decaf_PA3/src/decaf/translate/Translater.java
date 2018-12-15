@@ -371,6 +371,18 @@ public class Translater {
 		genMark(exit);
 	}
 
+	//检查数组初始化常量大于0
+	public void genCheckInitialSize(Temp size) {
+		Label exit = Label.createLabel();
+		Temp cond = genLes(size, genLoadImm4(0));
+		genBeqz(cond, exit);
+		Temp msg = genLoadStrConst(RuntimeError.ARRAY_INIT_USING_ZERO);
+		genParm(msg);
+		genIntrinsicCall(Intrinsic.PRINT_STRING);
+		genIntrinsicCall(Intrinsic.HALT);
+		genMark(exit);	
+	}
+
 	public Temp genNewArray(Temp length) {
 		genCheckNewArraySize(length);
 		Temp unit = genLoadImm4(OffsetCounter.WORD_SIZE);

@@ -143,6 +143,15 @@ public class TransPass2 extends Tree.Visitor {
 			tr.genAssign(((Tree.Ident) assign.left).symbol.getTemp(),
 					assign.expr.val);
 			break;
+		case AUTO_VAR:
+			// System.out.println(assign.expr.val);
+			// Temp varTemp = Temp.createTempI4();
+			// Tree.Ident ident = (Tree.Ident)assign.left;
+			// varTemp.sym = ident.symbol;
+			// ident.symbol.setTemp(varTemp);
+			// System.out.println(((Tree.Ident)assign.left).symbol.getTemp());
+			tr.genAssign(((Tree.Ident)assign.left).symbol.getTemp(),
+					assign.expr.val);
 		}
 	}
 
@@ -247,12 +256,15 @@ public class TransPass2 extends Tree.Visitor {
 		if(ident.lvKind == Tree.LValue.Kind.MEMBER_VAR){
 			ident.owner.accept(this);
 		}
-
-	//	System.out.println(ident.symbol);
 		
 		switch (ident.lvKind) {
 		case MEMBER_VAR:
 			ident.val = tr.genLoad(ident.owner.val, ident.symbol.getOffset());
+			break;
+		case AUTO_VAR:
+			Temp varTemp = Temp.createTempI4();
+			varTemp.sym = ident.symbol;
+			ident.symbol.setTemp(varTemp);
 			break;
 		default:
 			ident.val = ident.symbol.getTemp();
@@ -405,4 +417,5 @@ public class TransPass2 extends Tree.Visitor {
 		ifSub.branch.accept(this);
 		tr.genMark(label);
 	}
+	//wc add ended
 }

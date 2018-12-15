@@ -329,6 +329,7 @@ public class TypeCheck extends Tree.Visitor {
 			Symbol v = table.lookupBeforeLocation(ident.name, ident
 					.getLocation());
 			if(ident.isVar) {
+				ident.lvKind = Tree.LValue.Kind.AUTO_VAR;
 				if(ident.type == null) ident.type = BaseType.UNKNOWN;
 				return;
 			} else if (v == null) {
@@ -460,8 +461,8 @@ public class TypeCheck extends Tree.Visitor {
 		if(assign.left.type.equal(BaseType.UNKNOWN)) {
 			assign.left.type = assign.expr.type;
 			Tree.Ident var = (Tree.Ident)assign.left;
-
 			Variable variable = (Variable)table.lookup(var.name, true);
+			var.symbol = variable;
 			variable.setType(assign.left.type);
 		}
 

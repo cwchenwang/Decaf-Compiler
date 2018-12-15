@@ -1017,7 +1017,7 @@ public abstract class Tree {
     public abstract static class LValue extends Expr {
 
     	public enum Kind {
-    		LOCAL_VAR, PARAM_VAR, MEMBER_VAR, ARRAY_ELEMENT
+    		LOCAL_VAR, PARAM_VAR, MEMBER_VAR, ARRAY_ELEMENT, AUTO_VAR
     	}
     	public Kind lvKind;
     	public boolean isVar = false;
