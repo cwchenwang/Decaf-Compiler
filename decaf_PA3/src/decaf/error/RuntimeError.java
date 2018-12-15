@@ -14,6 +14,8 @@ public final class RuntimeError {
 
 	public static final String ARRAY_INIT_USING_ZERO = "Decaf runtime error: The length of the created array should not be less than 0.";
 
+	public static final String DIVISION_BY_ZERO = "Decaf runtime error: Division by zero error.";
+
 	public static final String CLASS_CAST_ERROR1 = "Decaf runtime error: ";
 	
 	public static final String CLASS_CAST_ERROR2 = " cannot be cast to ";

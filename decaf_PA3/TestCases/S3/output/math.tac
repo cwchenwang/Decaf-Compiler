@@ -86,8 +86,16 @@ _L22:
     _T34 = (_T29 + _T33)
     _T29 = _T34
     _T35 = 2
-    _T36 = (_T3 / _T35)
-    _T3 = _T36
+    _T36 = 0
+    _T37 = (_T35 == _T36)
+    if (_T37 == 0) branch _L24
+    _T38 = "Decaf runtime error: Division by zero error."
+    parm _T38
+    call _PrintString
+    call _Halt
+_L24:
+    _T39 = (_T3 / _T35)
+    _T3 = _T39
     branch _L22
 _L23:
     return _T29
@@ -96,76 +104,76 @@ _L23:
 FUNCTION(_Math.max) {
 memo '_T4:4 _T5:8'
 _Math.max:
-    _T37 = (_T4 > _T5)
-    if (_T37 == 0) branch _L24
+    _T40 = (_T4 > _T5)
+    if (_T40 == 0) branch _L25
     return _T4
-    branch _L25
-_L24:
-    return _T5
+    branch _L26
 _L25:
+    return _T5
+_L26:
 }
 
 FUNCTION(_Math.min) {
 memo '_T6:4 _T7:8'
 _Math.min:
-    _T38 = (_T6 < _T7)
-    if (_T38 == 0) branch _L26
+    _T41 = (_T6 < _T7)
+    if (_T41 == 0) branch _L27
     return _T6
-    branch _L27
-_L26:
-    return _T7
+    branch _L28
 _L27:
+    return _T7
+_L28:
 }
 
 FUNCTION(main) {
 memo ''
 main:
-    _T39 = 1
-    _T40 = - _T39
-    parm _T40
-    _T41 =  call _Math.abs
-    parm _T41
-    call _PrintInt
-    _T42 = "\n"
-    parm _T42
-    call _PrintString
-    _T43 = 2
-    _T44 = 3
+    _T42 = 1
+    _T43 = - _T42
     parm _T43
+    _T44 =  call _Math.abs
     parm _T44
-    _T45 =  call _Math.pow
-    parm _T45
     call _PrintInt
-    _T46 = "\n"
-    parm _T46
+    _T45 = "\n"
+    parm _T45
     call _PrintString
-    _T47 = 16
+    _T46 = 2
+    _T47 = 3
+    parm _T46
     parm _T47
-    _T48 =  call _Math.log
+    _T48 =  call _Math.pow
     parm _T48
     call _PrintInt
     _T49 = "\n"
     parm _T49
     call _PrintString
-    _T50 = 1
-    _T51 = 2
+    _T50 = 16
     parm _T50
+    _T51 =  call _Math.log
     parm _T51
-    _T52 =  call _Math.max
+    call _PrintInt
+    _T52 = "\n"
     parm _T52
-    call _PrintInt
-    _T53 = "\n"
-    parm _T53
     call _PrintString
-    _T54 = 1
-    _T55 = 2
+    _T53 = 1
+    _T54 = 2
+    parm _T53
     parm _T54
+    _T55 =  call _Math.max
     parm _T55
-    _T56 =  call _Math.min
-    parm _T56
     call _PrintInt
-    _T57 = "\n"
+    _T56 = "\n"
+    parm _T56
+    call _PrintString
+    _T57 = 1
+    _T58 = 2
     parm _T57
+    parm _T58
+    _T59 =  call _Math.min
+    parm _T59
+    call _PrintInt
+    _T60 = "\n"
+    parm _T60
     call _PrintString
 }
 

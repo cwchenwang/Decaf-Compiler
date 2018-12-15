@@ -35,3 +35,10 @@
 
   - 修改了`genCheckNewArraySize`，添加了参数int opt。如果opt为1则报数组初始化n取值小于0的错，否则和之前一样报NEGATIVE_ARRAY_SIZE的错、
   - 修改了`genNewArray`函数：添加了Temp value和int opt参数，其中value用来是数组初始化的值，正常情况下为0，当适用E%%n时值为E的值，opt含义和上面的genCheckNewArraySize相同。
+
+#### “除零非法”检测
+
+`Translater.java`：
+
+- 增加了`genCheckDivByZero`，参数为除数，如果除数为0，则报错并且停机，否则直接退出。（写法和`genCheckNewArraySize`基本相同）。
+- 在`genMul`和`genMod`调用上述函数进行判断。

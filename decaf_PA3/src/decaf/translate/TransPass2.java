@@ -435,13 +435,22 @@ public class TransPass2 extends Tree.Visitor {
 		tr.genBeqz(cond, outOfBound); //数组越界
 		tr.genMark(inBound); //没越界的情况
 		Temp offset = tr.genMul(tr.genLoadImm4(OffsetCounter.WORD_SIZE), arrDefault.expr2.val);
-		Temp dst = tr.genAdd(arrDefault.expr1.val, offset);
-		arrDefault.val = tr.genLoad(dst, 0);
+		Temp addr = tr.genAdd(arrDefault.expr1.val, offset);
+		arrDefault.val = tr.genLoad(addr, 0);
 		tr.genBranch(exit);
 
 		tr.genMark(outOfBound);
 		tr.genAssign(arrDefault.val, arrDefault.expr3.val);
 		tr.genMark(exit);
+	}
+
+	@Override
+	public void visitForeach(Tree.Foreach foreach) {
+		foreach.stmt1.accept(this);
+		foreach.expr1.accept(this);
+		if(foreach.expr2 != null) {
+			foreach.expr2.accept(this);
+		}
 	}
 	// wc add ended
 }

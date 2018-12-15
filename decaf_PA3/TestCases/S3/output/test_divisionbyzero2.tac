@@ -22,10 +22,18 @@ main:
     call _PrintString
     _T5 = 13
     _T6 = 0
-    _T7 = (_T5 % _T6)
-    _T3 = _T7
-    _T8 = "end"
-    parm _T8
+    _T7 = 0
+    _T8 = (_T6 == _T7)
+    if (_T8 == 0) branch _L10
+    _T9 = "Decaf runtime error: Division by zero error."
+    parm _T9
+    call _PrintString
+    call _Halt
+_L10:
+    _T10 = (_T5 % _T6)
+    _T3 = _T10
+    _T11 = "end"
+    parm _T11
     call _PrintString
 }
 
