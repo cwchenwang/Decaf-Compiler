@@ -33,8 +33,7 @@ public class TransPass2 extends Tree.Visitor {
 	@Override
 	public void visitMethodDef(Tree.MethodDef funcDefn) {
 		if (!funcDefn.statik) {
-			currentThis = ((Variable) funcDefn.symbol.getAssociatedScope()
-					.lookup("this")).getTemp();
+			currentThis = ((Variable) funcDefn.symbol.getAssociatedScope().lookup("this")).getTemp();
 		}
 		tr.beginFunc(funcDefn.symbol);
 		funcDefn.body.accept(this);
@@ -104,17 +103,15 @@ public class TransPass2 extends Tree.Visitor {
 	}
 
 	private void genEquNeq(Tree.Binary expr) {
-		if (expr.left.type.equal(BaseType.STRING)
-				|| expr.right.type.equal(BaseType.STRING)) {
+		if (expr.left.type.equal(BaseType.STRING) || expr.right.type.equal(BaseType.STRING)) {
 			tr.genParm(expr.left.val);
 			tr.genParm(expr.right.val);
-			expr.val = tr.genDirectCall(Intrinsic.STRING_EQUAL.label,
-					BaseType.BOOL);
-			if(expr.tag == Tree.NE){
+			expr.val = tr.genDirectCall(Intrinsic.STRING_EQUAL.label, BaseType.BOOL);
+			if (expr.tag == Tree.NE) {
 				expr.val = tr.genLNot(expr.val);
 			}
 		} else {
-			if(expr.tag == Tree.EQ)
+			if (expr.tag == Tree.EQ)
 				expr.val = tr.genEqu(expr.left.val, expr.right.val);
 			else
 				expr.val = tr.genNeq(expr.left.val, expr.right.val);
@@ -135,13 +132,11 @@ public class TransPass2 extends Tree.Visitor {
 			break;
 		case MEMBER_VAR:
 			Tree.Ident varRef = (Tree.Ident) assign.left;
-			tr.genStore(assign.expr.val, varRef.owner.val, varRef.symbol
-					.getOffset());
+			tr.genStore(assign.expr.val, varRef.owner.val, varRef.symbol.getOffset());
 			break;
 		case PARAM_VAR:
 		case LOCAL_VAR:
-			tr.genAssign(((Tree.Ident) assign.left).symbol.getTemp(),
-					assign.expr.val);
+			tr.genAssign(((Tree.Ident) assign.left).symbol.getTemp(), assign.expr.val);
 			break;
 		case AUTO_VAR:
 			// System.out.println(assign.expr.val);
@@ -150,8 +145,7 @@ public class TransPass2 extends Tree.Visitor {
 			// varTemp.sym = ident.symbol;
 			// ident.symbol.setTemp(varTemp);
 			// System.out.println(((Tree.Ident)assign.left).symbol.getTemp());
-			tr.genAssign(((Tree.Ident)assign.left).symbol.getTemp(),
-					assign.expr.val);
+			tr.genAssign(((Tree.Ident) assign.left).symbol.getTemp(), assign.expr.val);
 		}
 	}
 
@@ -159,13 +153,13 @@ public class TransPass2 extends Tree.Visitor {
 	public void visitLiteral(Tree.Literal literal) {
 		switch (literal.typeTag) {
 		case Tree.INT:
-			literal.val = tr.genLoadImm4(((Integer)literal.value).intValue());
+			literal.val = tr.genLoadImm4(((Integer) literal.value).intValue());
 			break;
 		case Tree.BOOL:
-			literal.val = tr.genLoadImm4((Boolean)(literal.value) ? 1 : 0);
+			literal.val = tr.genLoadImm4((Boolean) (literal.value) ? 1 : 0);
 			break;
 		default:
-			literal.val = tr.genLoadStrConst((String)literal.value);
+			literal.val = tr.genLoadStrConst((String) literal.value);
 		}
 	}
 
@@ -177,7 +171,7 @@ public class TransPass2 extends Tree.Visitor {
 	@Override
 	public void visitUnary(Tree.Unary expr) {
 		expr.expr.accept(this);
-		switch (expr.tag){
+		switch (expr.tag) {
 		case Tree.NEG:
 			expr.val = tr.genNeg(expr.expr.val);
 			break;
@@ -244,7 +238,7 @@ public class TransPass2 extends Tree.Visitor {
 		indexed.array.accept(this);
 		indexed.index.accept(this);
 		tr.genCheckArrayIndex(indexed.array.val, indexed.index.val);
-		
+
 		Temp esz = tr.genLoadImm4(OffsetCounter.WORD_SIZE);
 		Temp t = tr.genMul(indexed.index.val, esz);
 		Temp base = tr.genAdd(indexed.array.val, t);
@@ -253,10 +247,10 @@ public class TransPass2 extends Tree.Visitor {
 
 	@Override
 	public void visitIdent(Tree.Ident ident) {
-		if(ident.lvKind == Tree.LValue.Kind.MEMBER_VAR){
+		if (ident.lvKind == Tree.LValue.Kind.MEMBER_VAR) {
 			ident.owner.accept(this);
 		}
-		
+
 		switch (ident.lvKind) {
 		case MEMBER_VAR:
 			ident.val = tr.genLoad(ident.owner.val, ident.symbol.getOffset());
@@ -271,7 +265,7 @@ public class TransPass2 extends Tree.Visitor {
 			break;
 		}
 	}
-	
+
 	@Override
 	public void visitBreak(Tree.Break breakStmt) {
 		tr.genBranch(loopExits.peek());
@@ -281,8 +275,7 @@ public class TransPass2 extends Tree.Visitor {
 	public void visitCallExpr(Tree.CallExpr callExpr) {
 		if (callExpr.isArrayLength) {
 			callExpr.receiver.accept(this);
-			callExpr.val = tr.genLoad(callExpr.receiver.val,
-					-OffsetCounter.WORD_SIZE);
+			callExpr.val = tr.genLoad(callExpr.receiver.val, -OffsetCounter.WORD_SIZE);
 		} else {
 			if (callExpr.receiver != null) {
 				callExpr.receiver.accept(this);
@@ -297,14 +290,11 @@ public class TransPass2 extends Tree.Visitor {
 				tr.genParm(expr.val);
 			}
 			if (callExpr.receiver == null) {
-				callExpr.val = tr.genDirectCall(
-						callExpr.symbol.getFuncty().label, callExpr.symbol
-								.getReturnType());
+				callExpr.val = tr.genDirectCall(callExpr.symbol.getFuncty().label, callExpr.symbol.getReturnType());
 			} else {
 				Temp vt = tr.genLoad(callExpr.receiver.val, 0);
 				Temp func = tr.genLoad(vt, callExpr.symbol.getOffset());
-				callExpr.val = tr.genIndirectCall(func, callExpr.symbol
-						.getReturnType());
+				callExpr.val = tr.genIndirectCall(func, callExpr.symbol.getReturnType());
 			}
 		}
 
@@ -365,8 +355,7 @@ public class TransPass2 extends Tree.Visitor {
 
 	@Override
 	public void visitNewClass(Tree.NewClass newClass) {
-		newClass.val = tr.genDirectCall(newClass.symbol.getNewFuncLabel(),
-				BaseType.INT);
+		newClass.val = tr.genDirectCall(newClass.symbol.getNewFuncLabel(), BaseType.INT);
 	}
 
 	@Override
@@ -388,8 +377,7 @@ public class TransPass2 extends Tree.Visitor {
 	@Override
 	public void visitTypeTest(Tree.TypeTest typeTest) {
 		typeTest.instance.accept(this);
-		typeTest.val = tr.genInstanceof(typeTest.instance.val,
-				typeTest.symbol);
+		typeTest.val = tr.genInstanceof(typeTest.instance.val, typeTest.symbol);
 	}
 
 	@Override
@@ -401,10 +389,10 @@ public class TransPass2 extends Tree.Visitor {
 		typeCast.val = typeCast.expr.val;
 	}
 
-	//wc add
+	// wc add
 	@Override
 	public void visitGuarded(Tree.Guarded guarded) {
-		for(Tree condition : guarded.conditions) {
+		for (Tree condition : guarded.conditions) {
 			condition.accept(this);
 		}
 	}
@@ -422,12 +410,38 @@ public class TransPass2 extends Tree.Visitor {
 	public void visitArrayRepeat(Tree.ArrayRepeat arrRepeat) {
 		arrRepeat.expr1.accept(this);
 		arrRepeat.expr2.accept(this);
-		Type t = ((ArrayType)arrRepeat.type).getElementType();
-		if(t.equal(BaseType.BOOL) || t.equal(BaseType.INT) || t.equal(BaseType.STRING)) {
+		Type t = ((ArrayType) arrRepeat.type).getElementType();
+		if (t.equal(BaseType.BOOL) || t.equal(BaseType.INT) || t.equal(BaseType.STRING)) {
 			arrRepeat.val = tr.genNewArray(arrRepeat.expr2.val, arrRepeat.expr1.val, 1);
-		} else { //为class的情况
+		} else { // TODO:为class的情况
 
 		}
 	}
-	//wc add ended
+
+	@Override
+	public void visitDefault(Tree.Default arrDefault) {
+		arrDefault.expr1.accept(this);
+		arrDefault.expr2.accept(this);
+		arrDefault.expr3.accept(this);
+
+		Temp length = tr.genLoad(arrDefault.expr1.val, -OffsetCounter.WORD_SIZE);
+		Temp index = arrDefault.expr2.val;
+		Label outOfBound = Label.createLabel();
+		Temp cond = tr.genLes(index, tr.genLoadImm4(0));
+		Label inBound = Label.createLabel();
+		Label exit = Label.createLabel();
+		tr.genBnez(cond, outOfBound); //跳到越界的情况
+		cond = tr.genLes(index, length);
+		tr.genBeqz(cond, outOfBound); //数组越界
+		tr.genMark(inBound); //没越界的情况
+		Temp offset = tr.genMul(tr.genLoadImm4(OffsetCounter.WORD_SIZE), arrDefault.expr2.val);
+		Temp dst = tr.genAdd(arrDefault.expr1.val, offset);
+		arrDefault.val = tr.genLoad(dst, 0);
+		tr.genBranch(exit);
+
+		tr.genMark(outOfBound);
+		tr.genAssign(arrDefault.val, arrDefault.expr3.val);
+		tr.genMark(exit);
+	}
+	// wc add ended
 }
