@@ -1,15 +1,34 @@
-Exception in thread "main" java.lang.NullPointerException
-	at decaf.translate.TransPass2.visitIdent(TransPass2.java:253)
-	at decaf.tree.Tree$Ident.accept(Tree.java:1521)
-	at decaf.translate.TransPass2.visitAssign(TransPass2.java:126)
-	at decaf.tree.Tree$Assign.accept(Tree.java:1045)
-	at decaf.translate.TransPass2.visitBlock(TransPass2.java:188)
-	at decaf.tree.Tree$Block.accept(Tree.java:518)
-	at decaf.translate.TransPass2.visitMethodDef(TransPass2.java:40)
-	at decaf.tree.Tree$MethodDef.accept(Tree.java:438)
-	at decaf.translate.TransPass2.visitClassDef(TransPass2.java:29)
-	at decaf.tree.Tree$ClassDef.accept(Tree.java:403)
-	at decaf.translate.TransPass2.visitTopLevel(TransPass2.java:48)
-	at decaf.translate.Translater.translate(Translater.java:42)
-	at decaf.Driver.compile(Driver.java:104)
-	at decaf.Driver.main(Driver.java:117)
+VTABLE(_Main) {
+    <empty>
+    Main
+}
+
+FUNCTION(_Main_New) {
+memo ''
+_Main_New:
+    _T0 = 4
+    parm _T0
+    _T1 =  call _Alloc
+    _T2 = VTBL <_Main>
+    *(_T1 + 0) = _T2
+    return _T1
+}
+
+FUNCTION(_Main.foo) {
+memo ''
+_Main.foo:
+    _T4 = 100
+    _T3 = _T4
+    return _T3
+}
+
+FUNCTION(main) {
+memo ''
+main:
+    _T6 = 30
+    _T5 = _T6
+    _T7 = _T5
+    parm _T7
+    call _PrintInt
+}
+
