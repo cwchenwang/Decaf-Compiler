@@ -123,9 +123,7 @@ public class TransPass2 extends Tree.Visitor {
 
 	@Override
 	public void visitAssign(Tree.Assign assign) {
-	//	System.out.println("1");
 		assign.left.accept(this);
-	//	System.out.println("2");
 		assign.expr.accept(this);
 		switch (assign.left.lvKind) {
 		case ARRAY_ELEMENT:
@@ -394,25 +392,17 @@ public class TransPass2 extends Tree.Visitor {
 	//wc add
 	@Override
 	public void visitGuarded(Tree.Guarded guarded) {
-		if (guarded.conditions != null) {
-			for(Tree condition : guarded.conditions) {
-				condition.accept(this);
-			}
+		for(Tree condition : guarded.conditions) {
+			condition.accept(this);
 		}
 	}
 
-	//支持串行条件卫士
 	@Override
-	public void visitIfSub(Tree.IfSub ifSubStmt) {
-		ifSubStmt.condition.accept(this);    
-		if(ifSubStmt.branch != null) {					//如果没有语句块，不用做事情
-			Label exit = Label.createLabel();				//构建一个布尔值为假的标号,如果布尔值为假，则跳出此块
-
-			tr.genBeqz(ifSubStmt.condition.val, exit);
-			if (ifSubStmt.branch != null) {
-				ifSubStmt.branch.accept(this);			//如果布尔值为真，则会执行语句块
-			}
-			tr.genMark(exit);								//设定标号位置为语句块末尾
-		}
+	public void visitIfSub(Tree.IfSub ifSub) {
+		ifSub.condition.accept(this);
+		Label label = Label.createLabel();
+		tr.genBeqz(ifSub.condition.val, label);
+		ifSub.branch.accept(this);
+		tr.genMark(label);
 	}
 }
