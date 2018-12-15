@@ -360,31 +360,22 @@ public class Translater {
 		genMark(exit);
 	}
 
-	public void genCheckNewArraySize(Temp size) {
+	public void genCheckNewArraySize(Temp size, int opt) {
 		Label exit = Label.createLabel();
 		Temp cond = genLes(size, genLoadImm4(0));
 		genBeqz(cond, exit);
 		Temp msg = genLoadStrConst(RuntimeError.NEGATIVE_ARR_SIZE);
+		if(opt == 1) {
+			msg = genLoadStrConst(RuntimeError.ARRAY_INIT_USING_ZERO);
+		}
 		genParm(msg);
 		genIntrinsicCall(Intrinsic.PRINT_STRING);
 		genIntrinsicCall(Intrinsic.HALT);
 		genMark(exit);
 	}
 
-	//检查数组初始化常量大于0
-	public void genCheckInitialSize(Temp size) {
-		Label exit = Label.createLabel();
-		Temp cond = genLes(size, genLoadImm4(0));
-		genBeqz(cond, exit);
-		Temp msg = genLoadStrConst(RuntimeError.ARRAY_INIT_USING_ZERO);
-		genParm(msg);
-		genIntrinsicCall(Intrinsic.PRINT_STRING);
-		genIntrinsicCall(Intrinsic.HALT);
-		genMark(exit);	
-	}
-
-	public Temp genNewArray(Temp length) {
-		genCheckNewArraySize(length);
+	public Temp genNewArray(Temp length, Temp value, int opt) {
+		genCheckNewArraySize(length, opt);
 		Temp unit = genLoadImm4(OffsetCounter.WORD_SIZE);
 		Temp size = genAdd(unit, genMul(unit, length));
 		genParm(size);
@@ -392,13 +383,13 @@ public class Translater {
 		genStore(length, obj, 0);
 		Label loop = Label.createLabel();
 		Label exit = Label.createLabel();
-		Temp zero = genLoadImm4(0);
+		// Temp zero = genLoadImm4(0);
 		append(Tac.genAdd(obj, obj, size));
 		genMark(loop);
 		append(Tac.genSub(size, size, unit));
 		genBeqz(size, exit);
 		append(Tac.genSub(obj, obj, unit));
-		genStore(zero, obj, 0);
+		genStore(value, obj, 0);
 		genBranch(loop);
 		genMark(exit);
 		return obj;

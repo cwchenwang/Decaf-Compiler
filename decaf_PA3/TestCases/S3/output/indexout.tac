@@ -19,29 +19,29 @@ memo ''
 main:
     _T4 = 2
     _T5 = 0
-    _T6 = (_T4 < _T5)
-    if (_T6 == 0) branch _L10
-    _T7 = "Decaf runtime error: Cannot create negative-sized array\n"
-    parm _T7
+    _T6 = 0
+    _T7 = (_T4 < _T6)
+    if (_T7 == 0) branch _L10
+    _T8 = "Decaf runtime error: Cannot create negative-sized array\n"
+    parm _T8
     call _PrintString
     call _Halt
 _L10:
-    _T8 = 4
-    _T9 = (_T8 * _T4)
-    _T10 = (_T8 + _T9)
-    parm _T10
-    _T11 =  call _Alloc
-    *(_T11 + 0) = _T4
-    _T12 = 0
-    _T11 = (_T11 + _T10)
+    _T9 = 4
+    _T10 = (_T9 * _T4)
+    _T11 = (_T9 + _T10)
+    parm _T11
+    _T12 =  call _Alloc
+    *(_T12 + 0) = _T4
+    _T12 = (_T12 + _T11)
 _L11:
-    _T10 = (_T10 - _T8)
-    if (_T10 == 0) branch _L12
-    _T11 = (_T11 - _T8)
-    *(_T11 + 0) = _T12
+    _T11 = (_T11 - _T9)
+    if (_T11 == 0) branch _L12
+    _T12 = (_T12 - _T9)
+    *(_T12 + 0) = _T5
     branch _L11
 _L12:
-    _T3 = _T11
+    _T3 = _T12
     _T13 = 2
     _T14 = *(_T3 - 4)
     _T15 = (_T13 < _T14)

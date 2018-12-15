@@ -43,29 +43,29 @@ _Stack.Init:
     _T12 = *(_T0 + 8)
     _T13 = 100
     _T14 = 0
-    _T15 = (_T13 < _T14)
-    if (_T15 == 0) branch _L16
-    _T16 = "Decaf runtime error: Cannot create negative-sized array\n"
-    parm _T16
+    _T15 = 0
+    _T16 = (_T13 < _T15)
+    if (_T16 == 0) branch _L16
+    _T17 = "Decaf runtime error: Cannot create negative-sized array\n"
+    parm _T17
     call _PrintString
     call _Halt
 _L16:
-    _T17 = 4
-    _T18 = (_T17 * _T13)
-    _T19 = (_T17 + _T18)
-    parm _T19
-    _T20 =  call _Alloc
-    *(_T20 + 0) = _T13
-    _T21 = 0
-    _T20 = (_T20 + _T19)
+    _T18 = 4
+    _T19 = (_T18 * _T13)
+    _T20 = (_T18 + _T19)
+    parm _T20
+    _T21 =  call _Alloc
+    *(_T21 + 0) = _T13
+    _T21 = (_T21 + _T20)
 _L17:
-    _T19 = (_T19 - _T17)
-    if (_T19 == 0) branch _L18
-    _T20 = (_T20 - _T17)
-    *(_T20 + 0) = _T21
+    _T20 = (_T20 - _T18)
+    if (_T20 == 0) branch _L18
+    _T21 = (_T21 - _T18)
+    *(_T21 + 0) = _T14
     branch _L17
 _L18:
-    *(_T0 + 8) = _T20
+    *(_T0 + 8) = _T21
     _T22 = *(_T0 + 4)
     _T23 = 0
     *(_T0 + 4) = _T23

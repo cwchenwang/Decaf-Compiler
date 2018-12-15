@@ -8,7 +8,7 @@ import decaf.machdesc.Intrinsic;
 import decaf.symbol.Variable;
 import decaf.tac.Label;
 import decaf.tac.Temp;
-import decaf.type.BaseType;
+import decaf.type.*;
 
 public class TransPass2 extends Tree.Visitor {
 
@@ -360,7 +360,7 @@ public class TransPass2 extends Tree.Visitor {
 	@Override
 	public void visitNewArray(Tree.NewArray newArray) {
 		newArray.length.accept(this);
-		newArray.val = tr.genNewArray(newArray.length.val);
+		newArray.val = tr.genNewArray(newArray.length.val, tr.genLoadImm4(0), 0);
 	}
 
 	@Override
@@ -416,6 +416,18 @@ public class TransPass2 extends Tree.Visitor {
 		tr.genBeqz(ifSub.condition.val, label);
 		ifSub.branch.accept(this);
 		tr.genMark(label);
+	}
+
+	@Override
+	public void visitArrayRepeat(Tree.ArrayRepeat arrRepeat) {
+		arrRepeat.expr1.accept(this);
+		arrRepeat.expr2.accept(this);
+		Type t = ((ArrayType)arrRepeat.type).getElementType();
+		if(t.equal(BaseType.BOOL) || t.equal(BaseType.INT) || t.equal(BaseType.STRING)) {
+			arrRepeat.val = tr.genNewArray(arrRepeat.expr2.val, arrRepeat.expr1.val, 1);
+		} else { //为class的情况
+
+		}
 	}
 	//wc add ended
 }

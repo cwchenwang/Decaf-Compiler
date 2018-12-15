@@ -266,29 +266,29 @@ _DenseMatrix.Init:
     _T121 = *(_T10 + 4)
     _T122 = 10
     _T123 = 0
-    _T124 = (_T122 < _T123)
-    if (_T124 == 0) branch _L39
-    _T125 = "Decaf runtime error: Cannot create negative-sized array\n"
-    parm _T125
+    _T124 = 0
+    _T125 = (_T122 < _T124)
+    if (_T125 == 0) branch _L39
+    _T126 = "Decaf runtime error: Cannot create negative-sized array\n"
+    parm _T126
     call _PrintString
     call _Halt
 _L39:
-    _T126 = 4
-    _T127 = (_T126 * _T122)
-    _T128 = (_T126 + _T127)
-    parm _T128
-    _T129 =  call _Alloc
-    *(_T129 + 0) = _T122
-    _T130 = 0
-    _T129 = (_T129 + _T128)
+    _T127 = 4
+    _T128 = (_T127 * _T122)
+    _T129 = (_T127 + _T128)
+    parm _T129
+    _T130 =  call _Alloc
+    *(_T130 + 0) = _T122
+    _T130 = (_T130 + _T129)
 _L40:
-    _T128 = (_T128 - _T126)
-    if (_T128 == 0) branch _L41
-    _T129 = (_T129 - _T126)
-    *(_T129 + 0) = _T130
+    _T129 = (_T129 - _T127)
+    if (_T129 == 0) branch _L41
+    _T130 = (_T130 - _T127)
+    *(_T130 + 0) = _T123
     branch _L40
 _L41:
-    *(_T10 + 4) = _T129
+    *(_T10 + 4) = _T130
 _L42:
     _T131 = 10
     _T132 = (_T118 < _T131)
@@ -312,32 +312,32 @@ _L45:
     _T142 = *(_T141 + 0)
     _T143 = 10
     _T144 = 0
-    _T145 = (_T143 < _T144)
-    if (_T145 == 0) branch _L46
-    _T146 = "Decaf runtime error: Cannot create negative-sized array\n"
-    parm _T146
+    _T145 = 0
+    _T146 = (_T143 < _T145)
+    if (_T146 == 0) branch _L46
+    _T147 = "Decaf runtime error: Cannot create negative-sized array\n"
+    parm _T147
     call _PrintString
     call _Halt
 _L46:
-    _T147 = 4
-    _T148 = (_T147 * _T143)
-    _T149 = (_T147 + _T148)
-    parm _T149
-    _T150 =  call _Alloc
-    *(_T150 + 0) = _T143
-    _T151 = 0
-    _T150 = (_T150 + _T149)
+    _T148 = 4
+    _T149 = (_T148 * _T143)
+    _T150 = (_T148 + _T149)
+    parm _T150
+    _T151 =  call _Alloc
+    *(_T151 + 0) = _T143
+    _T151 = (_T151 + _T150)
 _L47:
-    _T149 = (_T149 - _T147)
-    if (_T149 == 0) branch _L48
-    _T150 = (_T150 - _T147)
-    *(_T150 + 0) = _T151
+    _T150 = (_T150 - _T148)
+    if (_T150 == 0) branch _L48
+    _T151 = (_T151 - _T148)
+    *(_T151 + 0) = _T144
     branch _L47
 _L48:
     _T152 = 4
     _T153 = (_T118 * _T152)
     _T154 = (_T133 + _T153)
-    *(_T154 + 0) = _T150
+    *(_T154 + 0) = _T151
     _T155 = 1
     _T156 = (_T118 + _T155)
     _T118 = _T156
@@ -533,29 +533,29 @@ _SparseMatrix.Init:
     _T240 = *(_T27 + 4)
     _T241 = 10
     _T242 = 0
-    _T243 = (_T241 < _T242)
-    if (_T243 == 0) branch _L65
-    _T244 = "Decaf runtime error: Cannot create negative-sized array\n"
-    parm _T244
+    _T243 = 0
+    _T244 = (_T241 < _T243)
+    if (_T244 == 0) branch _L65
+    _T245 = "Decaf runtime error: Cannot create negative-sized array\n"
+    parm _T245
     call _PrintString
     call _Halt
 _L65:
-    _T245 = 4
-    _T246 = (_T245 * _T241)
-    _T247 = (_T245 + _T246)
-    parm _T247
-    _T248 =  call _Alloc
-    *(_T248 + 0) = _T241
-    _T249 = 0
-    _T248 = (_T248 + _T247)
+    _T246 = 4
+    _T247 = (_T246 * _T241)
+    _T248 = (_T246 + _T247)
+    parm _T248
+    _T249 =  call _Alloc
+    *(_T249 + 0) = _T241
+    _T249 = (_T249 + _T248)
 _L66:
-    _T247 = (_T247 - _T245)
-    if (_T247 == 0) branch _L67
-    _T248 = (_T248 - _T245)
-    *(_T248 + 0) = _T249
+    _T248 = (_T248 - _T246)
+    if (_T248 == 0) branch _L67
+    _T249 = (_T249 - _T246)
+    *(_T249 + 0) = _T242
     branch _L66
 _L67:
-    *(_T27 + 4) = _T248
+    *(_T27 + 4) = _T249
 _L68:
     _T250 = 10
     _T251 = (_T238 < _T250)
