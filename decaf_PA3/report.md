@@ -36,12 +36,16 @@
 
 ##### （1） 数组初始化常量表达式
 
-- `TransPass2.java`：增加了visitArrayRepeat函数，如果不是class类型，直接调用genNewArray生成，如果是class类型 //TODO
+- `TransPass2.java`：增加了visitArrayRepeat函数，如果不是class类型，调用genNewArray生成，如果是class类型则调用genNewClassArray函数
 
 - `Translater.java`：
 
   - 修改了`genCheckNewArraySize`，添加了参数int opt。如果opt为1则报数组初始化n取值小于0的错，否则和之前一样报NEGATIVE_ARRAY_SIZE的错、
+
   - 修改了`genNewArray`函数：添加了Temp value和int opt参数，其中value用来是数组初始化的值，正常情况下为0，当适用E%%n时值为E的值，opt含义和上面的genCheckNewArraySize相同。
+
+  - 增加了`genNewClassArray`函数，和`genNewArray`类似，首先分配数组空间，填入长度，然后每次循环分配class类型的空间，将数组中相应位置指向该空间，并且进行类的浅拷贝。
+
 
 #### “除零非法”检测
 

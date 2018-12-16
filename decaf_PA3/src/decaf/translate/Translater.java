@@ -408,6 +408,37 @@ public class Translater {
 		return obj;
 	}
 
+	public Temp genNewClassArray(Temp length, Temp value, int classSize) {
+		genCheckNewArraySize(length, 1);
+		Temp unit = genLoadImm4(OffsetCounter.WORD_SIZE);
+		Temp size = genAdd(unit, genMul(unit, length));
+		genParm(size);
+		Temp obj = genIntrinsicCall(Intrinsic.ALLOCATE);
+		genStore(length, obj, 0);
+		Label loop = Label.createLabel();
+		Label exit = Label.createLabel();
+		append(Tac.genAdd(obj, obj, size));
+		genMark(loop);
+		append(Tac.genSub(size, size, unit));
+		genBeqz(size, exit);
+		append(Tac.genSub(obj, obj, unit));
+		
+		genParm(genLoadImm4(classSize));
+		Temp classObj = genIntrinsicCall(Intrinsic.ALLOCATE);
+		genStore(classObj, obj, 0);
+
+		int offset = 0;
+		while(offset < classSize) {
+			Temp tep = genLoad(value, offset);
+			genStore(tep, classObj, offset);
+			offset += OffsetCounter.WORD_SIZE;
+		}
+
+		genBranch(loop);
+		genMark(exit);
+		return obj;
+	}
+
 	public void genClassScopy(Temp dst, Temp src, int size) {
 		Temp tSize = genLoadImm4(size);
 		genParm(tSize);

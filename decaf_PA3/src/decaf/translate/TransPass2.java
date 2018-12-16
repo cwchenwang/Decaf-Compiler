@@ -423,7 +423,10 @@ public class TransPass2 extends Tree.Visitor {
 		if (t.equal(BaseType.BOOL) || t.equal(BaseType.INT) || t.equal(BaseType.STRING)) {
 			arrRepeat.val = tr.genNewArray(arrRepeat.expr2.val, arrRepeat.expr1.val, 1);
 		} else { // TODO:为class的情况
-
+			int classSize = ((ClassType)arrRepeat.expr1.type).getSymbol().getSize();
+			// System.out.println(classSize);
+			arrRepeat.val = tr.genNewClassArray(arrRepeat.expr2.val, arrRepeat.expr1.val, classSize);
+			// System.out.println(arrRepeat.val);
 		}
 	}
 
