@@ -749,16 +749,18 @@ public abstract class Tree {
     public static class Scopy extends Tree {
 
         public Expr expr;
-        public String ident;
+        public String identName;
+        public Ident ident;
         public Location identLoc;
         public Location exprLoc;
 
-        public Scopy(Expr expr, String ident, Location loc, Location identLoc, Location exprLoc) {
+        public Scopy(Expr expr, String identName, Location loc, Location identLoc, Location exprLoc) {
             super(SCOPY, loc);
             this.expr = expr;
-            this.ident = ident;
+            this.identName = identName;
             this.identLoc = identLoc;
             this.exprLoc = exprLoc;
+            this.ident = new Ident(null, identName, identLoc);
         }
 
         @Override

@@ -602,7 +602,8 @@ public class TypeCheck extends Tree.Visitor {
 	//wc added
 	@Override
 	public void visitScopy(Tree.Scopy scopy) {
-		Symbol sym = table.lookup(scopy.ident, true);
+		scopy.ident.accept(this);
+		Symbol sym = table.lookup(scopy.identName, true);
 		if(sym != null) {
 			scopy.expr.accept(this);
 			if(!sym.getType().isClassType()) { //不是class，先报错再检查E
@@ -614,7 +615,7 @@ public class TypeCheck extends Tree.Visitor {
 				issueError(new BadScopySrcError(scopy.exprLoc, sym.getType().toString(), scopy.expr.type.toString()));
 			}
 		} else { //没有定义
-			issueError(new UndeclVarError(scopy.identLoc, scopy.ident));
+			issueError(new UndeclVarError(scopy.identLoc, scopy.identName));
 			scopy.type = BaseType.ERROR;
 		}
 	}

@@ -391,6 +391,15 @@ public class TransPass2 extends Tree.Visitor {
 
 	// wc add
 	@Override
+	public void visitScopy(Tree.Scopy scopy) {
+		scopy.ident.accept(this);
+		scopy.expr.accept(this);
+		int size = ((ClassType)scopy.ident.type).getSymbol().getSize();
+
+		tr.genClassScopy(scopy.ident.val, scopy.expr.val, size);
+	}
+
+	@Override
 	public void visitGuarded(Tree.Guarded guarded) {
 		for (Tree condition : guarded.conditions) {
 			condition.accept(this);

@@ -408,6 +408,19 @@ public class Translater {
 		return obj;
 	}
 
+	public void genClassScopy(Temp dst, Temp src, int size) {
+		Temp tSize = genLoadImm4(size);
+		genParm(tSize);
+		Temp obj = genIntrinsicCall(Intrinsic.ALLOCATE);
+		genAssign(dst, obj);
+		int offset = 0;
+		while(offset < size) {
+			Temp tep = genLoad(src, offset);
+			genStore(tep, obj, offset);
+			offset += OffsetCounter.WORD_SIZE;
+		}
+	}
+
 	public void genNewForClass(Class c) {
 		currentFuncty = new Functy();
 		currentFuncty.label = Label.createLabel(

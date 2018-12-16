@@ -17,6 +17,12 @@ class Father {
     void seta(int a) {
         this.a.seta(a);
     }
+    void setf(int f) {
+        this.field = f;
+    }
+    int getf() {
+        return this.field;
+    }
     int getA() {
         this.a.getA();
     }
@@ -35,5 +41,8 @@ class Main {
 		b.seta(5);
 		Print(b.getA());
 		Print(a.getA());
+        b.setf(8);
+        Print(b.getf());
+        Print(a.getf());
 	}
 }

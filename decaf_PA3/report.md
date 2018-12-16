@@ -4,6 +4,13 @@
 
 ### 一、特性的增加
 
+#### 1. 类的浅复制
+
+- `Translater.java`：增加了`genClassScopy`函数，参数为源class和目的class以及class的size。首先分配size的新内存空间，然后调用genAssign赋值给目的class（不用genAssign目的class拷贝会失败，无法实现浅复制）。最后逐个字将源class赋值给目的class。
+
+- `TransPass.java`：增加了`visitScopy`函数，访问源class和目的class，获得size，将参数传给`genClassScopy`就可以了。
+
+
 #### 3. 串行条件卫士语句
 
 - `TransPass2.java`：
