@@ -420,13 +420,11 @@ public class TransPass2 extends Tree.Visitor {
 		arrRepeat.expr1.accept(this);
 		arrRepeat.expr2.accept(this);
 		Type t = ((ArrayType) arrRepeat.type).getElementType();
-		if (t.equal(BaseType.BOOL) || t.equal(BaseType.INT) || t.equal(BaseType.STRING)) {
+		if (t.equal(BaseType.BOOL) || t.equal(BaseType.INT) || t.equal(BaseType.STRING)) { //基本类型的情况
 			arrRepeat.val = tr.genNewArray(arrRepeat.expr2.val, arrRepeat.expr1.val, 1);
-		} else { // TODO:为class的情况
+		} else { //为class的情况
 			int classSize = ((ClassType)arrRepeat.expr1.type).getSymbol().getSize();
-			// System.out.println(classSize);
 			arrRepeat.val = tr.genNewClassArray(arrRepeat.expr2.val, arrRepeat.expr1.val, classSize);
-			// System.out.println(arrRepeat.val);
 		}
 	}
 
@@ -460,7 +458,7 @@ public class TransPass2 extends Tree.Visitor {
 	public void visitForeach(Tree.Foreach foreach) {
 		foreach.stmt1.accept(this);
 		foreach.expr1.accept(this);
-		if(foreach.expr2 != null) {
+		if(foreach.expr2 != null) { //有while
 			foreach.expr2.accept(this);
 		}
 	}

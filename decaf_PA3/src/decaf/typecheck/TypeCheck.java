@@ -615,7 +615,7 @@ public class TypeCheck extends Tree.Visitor {
 				issueError(new BadScopySrcError(scopy.exprLoc, sym.getType().toString(), scopy.expr.type.toString()));
 			}
 		} else { //没有定义
-			issueError(new UndeclVarError(scopy.identLoc, scopy.identName));
+			// issueError(new UndeclVarError(scopy.identLoc, scopy.identName));
 			scopy.type = BaseType.ERROR;
 		}
 	}
@@ -711,21 +711,8 @@ public class TypeCheck extends Tree.Visitor {
 		if(foreach.expr2 != null) {
 			foreach.expr2.accept(this);
 		}
-		if(foreach.stmt1.type == null) {
-			foreach.stmt1.type = BaseType.UNKNOWN;
-		}
-		if(foreach.expr1.type == null) {
-			foreach.expr1.type = BaseType.UNKNOWN;
-		}
-		if(foreach.expr2 != null && foreach.expr2.type == null) {
-			foreach.expr2.type = BaseType.UNKNOWN;
-		}
-		if(foreach.stmt2.type == null) {
-			foreach.stmt2.type = BaseType.UNKNOWN;
-		}
 
 		if(foreach.expr2 != null) {
-			// System.out.println(foreach.expr2.type.toString());
 			if(!foreach.expr2.type.compatible(BaseType.BOOL)) {
 				issueError(new BadTestExpr(foreach.expr2.getLocation()));
 				foreach.expr2.type = BaseType.ERROR;
@@ -756,7 +743,16 @@ public class TypeCheck extends Tree.Visitor {
 				bvar.type = ((ArrayType)foreach.expr1.type).getElementType();
 			}
 		} else { //如果是Type x...
-			if(!bvar.type.compatible(((ArrayType)foreach.expr1.type).getElementType())) {
+			// System.out.println(bvar.type);
+			// System.out.println(((ArrayType)foreach.expr1.type).getElementType());
+			if(!foreach.expr1.type.isArrayType()) {
+				issueError(new BadArrOperArgError(foreach.expr1.getLocation()));
+				bvar.type = BaseType.ERROR;
+				variable.setType(BaseType.ERROR);
+				table.close();
+				return;
+			}
+			if(!((ArrayType)foreach.expr1.type).getElementType().compatible(bvar.type)) {
 				issueError(new BadForeachTypeError(foreach.expr1.loc, bvar.type.toString(), ((ArrayType)foreach.expr1.type).getElementType().toString()));
 			}
 		}

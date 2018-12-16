@@ -213,8 +213,12 @@ public class BuildSym extends Tree.Visitor {
 
 	@Override
 	public void visitBoundedVariable(Tree.BoundedVariable bvar) {
-		if(bvar.inType == null) //为var
+		if(bvar.inType == null) {//为var
 			bvar.type = BaseType.UNKNOWN;
+		} else {
+			bvar.inType.accept(this);
+			bvar.type = bvar.inType.type;
+		}
 	}
 
 	@Override
