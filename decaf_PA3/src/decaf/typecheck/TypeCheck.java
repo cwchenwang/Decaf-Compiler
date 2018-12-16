@@ -706,21 +706,11 @@ public class TypeCheck extends Tree.Visitor {
 
 	@Override
 	public void visitForeach(Tree.Foreach foreach) {
-		foreach.stmt1.accept(this);
-		foreach.expr1.accept(this);
-		if(foreach.expr2 != null) {
-			foreach.expr2.accept(this);
-		}
-
-		if(foreach.expr2 != null) {
-			if(!foreach.expr2.type.compatible(BaseType.BOOL)) {
-				issueError(new BadTestExpr(foreach.expr2.getLocation()));
-				foreach.expr2.type = BaseType.ERROR;
-			}
-		}
-
 		Tree.Block block = (Tree.Block)foreach.stmt2;
 		table.open(block.associatedScope);
+
+		foreach.stmt1.accept(this);
+		foreach.expr1.accept(this);
 
 		Tree.BoundedVariable bvar = (Tree.BoundedVariable)foreach.stmt1;
 		Variable variable = (Variable)table.lookup(bvar.name, true);
@@ -757,9 +747,21 @@ public class TypeCheck extends Tree.Visitor {
 			}
 		}
 		variable.setType(bvar.type);
+		if(foreach.expr2 != null) { //有while部分
+			foreach.expr2.accept(this);
+		}
+		if(foreach.expr2 != null) {
+			if(!foreach.expr2.type.compatible(BaseType.BOOL)) {
+				issueError(new BadTestExpr(foreach.expr2.getLocation()));
+				foreach.expr2.type = BaseType.ERROR;
+			}
+		}
+
+		breaks.add(foreach);
 		for (Tree s : block.block) {
 			s.accept(this);
 		}
+		breaks.pop();
 		table.close();
 	}
 	//wc add ended

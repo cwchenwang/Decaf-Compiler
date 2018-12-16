@@ -458,9 +458,38 @@ public class TransPass2 extends Tree.Visitor {
 	public void visitForeach(Tree.Foreach foreach) {
 		foreach.stmt1.accept(this);
 		foreach.expr1.accept(this);
+
+		Tree.BoundedVariable bvar = (Tree.BoundedVariable)foreach.stmt1;
+		Temp bvarTemp = Temp.createTempI4();
+		bvarTemp.sym = bvar.symbol;
+		bvar.symbol.setTemp(bvarTemp);
+
+		
+		Temp length = tr.genLoad(foreach.expr1.val, -OffsetCounter.WORD_SIZE);
+		Temp iter = tr.genLoadImm4(0);
+		// Temp step = tr.genLoadImm4(1);
+		Temp cond = tr.genEqu(iter, length);
+		Label loop = Label.createLabel();
+		Label exit = Label.createLabel();
+
+		tr.genMark(loop);
+		cond = tr.genEqu(iter, length);
+		tr.genBnez(cond, exit); //不为0即iter=length，结束
+		Temp offset = tr.genMul(tr.genLoadImm4(OffsetCounter.WORD_SIZE), iter);
+		Temp addr = tr.genAdd(foreach.expr1.val, offset);
+		tr.genAssign(bvarTemp, tr.genLoad(addr, 0));
+		tr.genAssign(iter, tr.genAdd(iter, tr.genLoadImm4(1))); //加1
+		
 		if(foreach.expr2 != null) { //有while
-			foreach.expr2.accept(this);
+			foreach.expr2.accept(this); //while部分
+			tr.genBeqz(foreach.expr2.val, exit); //为假跳出循环
 		}
+		loopExits.push(exit);
+		foreach.stmt2.accept(this); //为真执行语句块
+		loopExits.push(exit);
+		tr.genBranch(loop);
+
+		tr.genMark(exit);
 	}
 	// wc add ended
 }

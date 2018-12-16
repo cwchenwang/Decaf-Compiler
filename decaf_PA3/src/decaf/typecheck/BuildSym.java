@@ -223,11 +223,6 @@ public class BuildSym extends Tree.Visitor {
 
 	@Override
 	public void visitForeach(Tree.Foreach foreach) {
-		foreach.stmt1.accept(this);
-		foreach.expr1.accept(this);
-		if(foreach.expr2 != null) { //有while部分
-			foreach.expr2.accept(this);
-		}
 		
 		Tree.Block block;
 		if(foreach.stmt2 instanceof Tree.Block) { //如果是一个block 
@@ -240,9 +235,18 @@ public class BuildSym extends Tree.Visitor {
 		}
 		block.associatedScope = new LocalScope(block);
 		table.open(block.associatedScope);
+
 		Tree.BoundedVariable bvar = (Tree.BoundedVariable)foreach.stmt1;
 		Variable variable = new Variable(bvar.name, bvar.type, bvar.getLocation());
 		table.declare(variable);
+		bvar.symbol = variable;
+
+		foreach.stmt1.accept(this);
+		foreach.expr1.accept(this);
+		if(foreach.expr2 != null) { //有while部分
+			foreach.expr2.accept(this);
+		}
+
 		for (Tree s : block.block) {
 			s.accept(this);
 		}

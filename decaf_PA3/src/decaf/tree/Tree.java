@@ -876,7 +876,8 @@ public abstract class Tree {
 
         public TypeLiteral inType;
         public String name;
-
+        public Variable symbol;
+        
         public BoundedVariable(TypeLiteral type, String name, Location loc) {
             super(BOUNDEDVARIABLE, loc);
             this.name = name;
