@@ -140,12 +140,12 @@ public class TransPass2 extends Tree.Visitor {
 			break;
 		case AUTO_VAR:
 			// System.out.println(assign.expr.val);
-			// Temp varTemp = Temp.createTempI4();
-			// Tree.Ident ident = (Tree.Ident)assign.left;
-			// varTemp.sym = ident.symbol;
-			// ident.symbol.setTemp(varTemp);
+			Temp varTemp = Temp.createTempI4();
+			Tree.Ident ident = (Tree.Ident)assign.left;
+			varTemp.sym = ident.symbol;
+			ident.symbol.setTemp(varTemp);
 			// System.out.println(((Tree.Ident)assign.left).symbol.getTemp());
-			tr.genAssign(((Tree.Ident) assign.left).symbol.getTemp(), assign.expr.val);
+			tr.genAssign(ident.symbol.getTemp(), assign.expr.val);
 		}
 	}
 
@@ -254,11 +254,6 @@ public class TransPass2 extends Tree.Visitor {
 		switch (ident.lvKind) {
 		case MEMBER_VAR:
 			ident.val = tr.genLoad(ident.owner.val, ident.symbol.getOffset());
-			break;
-		case AUTO_VAR:
-			Temp varTemp = Temp.createTempI4();
-			varTemp.sym = ident.symbol;
-			ident.symbol.setTemp(varTemp);
 			break;
 		default:
 			ident.val = ident.symbol.getTemp();
@@ -396,7 +391,16 @@ public class TransPass2 extends Tree.Visitor {
 		scopy.expr.accept(this);
 		int size = ((ClassType)scopy.ident.type).getSymbol().getSize();
 
-		tr.genClassScopy(scopy.ident.val, scopy.expr.val, size);
+		Temp tSize = tr.genLoadImm4(size);
+		tr.genParm(tSize);
+		Temp obj = tr.genIntrinsicCall(Intrinsic.ALLOCATE);
+		tr.genAssign(scopy.ident.val, obj);
+		int offset = 0;
+		while(offset < size) {
+			Temp tep = tr.genLoad(scopy.expr.val, offset);
+			tr.genStore(tep, obj, offset);
+			offset += OffsetCounter.WORD_SIZE;
+		}
 	}
 
 	@Override
@@ -420,11 +424,11 @@ public class TransPass2 extends Tree.Visitor {
 		arrRepeat.expr1.accept(this);
 		arrRepeat.expr2.accept(this);
 		Type t = ((ArrayType) arrRepeat.type).getElementType();
-		if (t.equal(BaseType.BOOL) || t.equal(BaseType.INT) || t.equal(BaseType.STRING)) { //基本类型的情况
-			arrRepeat.val = tr.genNewArray(arrRepeat.expr2.val, arrRepeat.expr1.val, 1);
-		} else { //为class的情况
+		if(t.isClassType()) {
 			int classSize = ((ClassType)arrRepeat.expr1.type).getSymbol().getSize();
 			arrRepeat.val = tr.genNewClassArray(arrRepeat.expr2.val, arrRepeat.expr1.val, classSize);
+		} else {
+			arrRepeat.val = tr.genNewArray(arrRepeat.expr2.val, arrRepeat.expr1.val, 1);
 		}
 	}
 
@@ -434,24 +438,30 @@ public class TransPass2 extends Tree.Visitor {
 		arrDefault.expr2.accept(this);
 		arrDefault.expr3.accept(this);
 
+		Temp defaultTemp = Temp.createTempI4();
 		Temp length = tr.genLoad(arrDefault.expr1.val, -OffsetCounter.WORD_SIZE);
 		Temp index = arrDefault.expr2.val;
 		Label outOfBound = Label.createLabel();
-		Temp cond = tr.genLes(index, tr.genLoadImm4(0));
+		Temp cond = tr.genLes(index, tr.genLoadImm4(0));//判断小于0
 		Label inBound = Label.createLabel();
 		Label exit = Label.createLabel();
 		tr.genBnez(cond, outOfBound); //跳到越界的情况
-		cond = tr.genLes(index, length);
-		tr.genBeqz(cond, outOfBound); //数组越界
+		cond = tr.genLes(index, length); //判断是否小于length
+		tr.genBnez(cond, inBound);
+
+		//越界情况
+		tr.genMark(outOfBound);
+		tr.genAssign(defaultTemp, arrDefault.expr3.val);
+		tr.genBranch(exit);
+
 		tr.genMark(inBound); //没越界的情况
 		Temp offset = tr.genMul(tr.genLoadImm4(OffsetCounter.WORD_SIZE), arrDefault.expr2.val);
 		Temp addr = tr.genAdd(arrDefault.expr1.val, offset);
-		arrDefault.val = tr.genLoad(addr, 0);
+		tr.genAssign(defaultTemp, tr.genLoad(addr, 0)); 
 		tr.genBranch(exit);
 
-		tr.genMark(outOfBound);
-		tr.genAssign(arrDefault.val, arrDefault.expr3.val);
 		tr.genMark(exit);
+		arrDefault.val = defaultTemp;
 	}
 
 	@Override
@@ -467,7 +477,6 @@ public class TransPass2 extends Tree.Visitor {
 		
 		Temp length = tr.genLoad(foreach.expr1.val, -OffsetCounter.WORD_SIZE);
 		Temp iter = tr.genLoadImm4(0);
-		// Temp step = tr.genLoadImm4(1);
 		Temp cond = tr.genEqu(iter, length);
 		Label loop = Label.createLabel();
 		Label exit = Label.createLabel();

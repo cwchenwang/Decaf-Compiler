@@ -396,7 +396,6 @@ public class Translater {
 		genStore(length, obj, 0);
 		Label loop = Label.createLabel();
 		Label exit = Label.createLabel();
-		// Temp zero = genLoadImm4(0);
 		append(Tac.genAdd(obj, obj, size));
 		genMark(loop);
 		append(Tac.genSub(size, size, unit));
@@ -437,19 +436,6 @@ public class Translater {
 		genBranch(loop);
 		genMark(exit);
 		return obj;
-	}
-
-	public void genClassScopy(Temp dst, Temp src, int size) {
-		Temp tSize = genLoadImm4(size);
-		genParm(tSize);
-		Temp obj = genIntrinsicCall(Intrinsic.ALLOCATE);
-		genAssign(dst, obj);
-		int offset = 0;
-		while(offset < size) {
-			Temp tep = genLoad(src, offset);
-			genStore(tep, obj, offset);
-			offset += OffsetCounter.WORD_SIZE;
-		}
 	}
 
 	public void genNewForClass(Class c) {
