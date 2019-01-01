@@ -46,6 +46,11 @@ public class BasicBlock {
 
     public Set<Temp> saves;
 
+    public Set<Pair> liveInDU;
+    public Set<Pair> liveOutDU;
+    public Set<Pair> liveUseDU;
+    public Set<Pair> defDU;
+
     private List<Asm> asms;
 
     /**
@@ -65,6 +70,10 @@ public class BasicBlock {
         asms = new ArrayList<Asm>();
 
         DUChain = new TreeMap<Pair, Set<Integer>>(Pair.COMPARATOR);
+        liveInDU = new TreeSet<Pair>(Pair.COMPARATOR);
+        liveOutDU = new TreeSet<Pair>(Pair.COMPARATOR);
+        liveUseDU = new TreeSet<Pair>(Pair.COMPARATOR);
+        defDU = new TreeSet<Pair>(Pair.COMPARATOR);
     }
 
     public void allocateTacIds() {
@@ -225,6 +234,189 @@ public class BasicBlock {
                     break;
             }
         }
+    }
+
+    public void computeDefAndLiveUseDU() {
+        for (Tac tac = tacList; tac != null; tac = tac.next) {
+            switch (tac.opc) {
+                case ADD:
+                case SUB:
+                case MUL:
+                case DIV:
+                case MOD:
+                case LAND:
+                case LOR:
+                case GTR:
+                case GEQ:
+                case EQU:
+                case NEQ:
+                case LEQ:
+                case LES:
+                /* use op1 and op2, def op0 */
+                    if (tac.op1.lastVisitedBB != bbNum) {
+                        liveUseDU.add(new Pair(tac.id, tac.op1));
+                        tac.op1.lastVisitedBB = bbNum;
+                    }
+                    if (tac.op2.lastVisitedBB != bbNum) {
+                        liveUseDU.add(new Pair(tac.id, tac.op2));
+                        tac.op2.lastVisitedBB = bbNum;
+                    }
+                    if (tac.op0.lastVisitedBB != bbNum) {
+                        defDU.add(new Pair(tac.id, tac.op0));
+                        tac.op0.lastVisitedBB = bbNum;
+                    }
+                    break;
+                case NEG:
+                case LNOT:
+                case ASSIGN:
+                case INDIRECT_CALL:
+                case LOAD:
+                /* use op1, def op0 */
+                    if (tac.op1.lastVisitedBB != bbNum) {
+                        liveUseDU.add(new Pair(tac.id, tac.op1));
+                        tac.op1.lastVisitedBB = bbNum;
+                    }
+                    if(tac.op0 != null && tac.op0.lastVisitedBB != bbNum) {
+                        defDU.add(new Pair(tac.id, tac.op0));
+                        tac.op0.lastVisitedBB = bbNum;
+                    }
+                    break;
+                case LOAD_VTBL:
+                case DIRECT_CALL:
+                case RETURN:
+                case LOAD_STR_CONST:
+                case LOAD_IMM4:
+				/* def op0 */
+                    if (tac.op0 != null && tac.op0.lastVisitedBB != bbNum) {  // in DIRECT_CALL with return type VOID,
+                        // tac.op0 is null
+                        defDU.add(new Pair(tac.id, tac.op0));
+                        tac.op0.lastVisitedBB = bbNum;
+                    }
+                    break;
+                case STORE:
+				/* use op0 and op1*/
+                    if (tac.op0.lastVisitedBB != bbNum) {
+                        liveUseDU.add(new Pair(tac.id, tac.op0));
+                        tac.op0.lastVisitedBB = bbNum;
+                    }
+                    if (tac.op1.lastVisitedBB != bbNum) {
+                        liveUseDU.add(new Pair(tac.id, tac.op1));
+                        tac.op1.lastVisitedBB = bbNum;
+                    }
+                    break;
+                case PARM:
+				/* use op0 */
+                    if (tac.op0.lastVisitedBB != bbNum) {
+                        liveUseDU.add(new Pair(tac.id, tac.op0));
+                        tac.op0.lastVisitedBB = bbNum;
+                    }
+                    break;
+                default:
+				/* BRANCH MEMO MARK PARM*/
+                    break;
+            }
+        }
+        if (var != null && var.lastVisitedBB != bbNum) { //出口语句
+            liveUseDU.add(new Pair(endId, var));
+            var.lastVisitedBB = bbNum;
+        }
+        liveInDU.addAll(liveUseDU);
+    }
+
+    public void computeDUChain() {
+        // System.out.println("Block ended by " + endId);
+        for(Tac tac = tacList; tac != null; tac = tac.next) {
+            // System.out.println(tac.opc);
+            if(isDefTac(tac)) {
+                // System.out.println("def stmt " + tac.id);
+                Pair pair = new Pair(tac.id, tac.op0);
+                Set<Integer> set = new TreeSet<>();
+                boolean hasDefInBlock = false; //判断在此块中是否还有其他该变量定值点
+                for(Tac j = tac.next; j != null; j = j.next) {
+                    if(isDefTac(j) && j.op0 == tac.op0) {
+                        hasDefInBlock = true;
+                        break;
+                    }
+                    if(j.op0 != null && j.op0 == tac.op0) {
+                        set.add(j.id);
+                    } else if(j.op1 != null && j.op1 == tac.op0) {
+                        set.add(j.id);
+                    } else if(j.op2 != null && j.op2 == tac.op0) {
+                        set.add(j.id);
+                    }
+                }
+                if(var != null && var == tac.op0) {
+                    set.add(endId);
+                }
+                if(hasDefInBlock == false) {
+                    // System.out.println("no other def in block " + tac.id);
+                    for(Pair p : liveOutDU) {
+                        // System.out.println(p);
+                        if(p.tmp == tac.op0) {
+                            set.add(p.pos);
+                        }
+                    }
+                }
+                DUChain.put(pair, set);
+            }
+        }
+    }
+
+    //判断是否为定值点
+    public boolean isDefTac(Tac tac) {
+        boolean isDef = false;
+        switch (tac.opc) {
+            case ADD:
+            case SUB:
+            case MUL:
+            case DIV:
+            case MOD:
+            case LAND:
+            case LOR:
+            case GTR:
+            case GEQ:
+            case EQU:
+            case NEQ:
+            case LEQ:
+            case LES:
+            /* use op1 and op2, def op0 */
+                isDef = true;
+                break;
+            case NEG:
+            case LNOT:
+            case ASSIGN:
+            case INDIRECT_CALL:
+            case LOAD:
+            /* use op1, def op0 */
+                if (tac.op0 != null) {  // in INDIRECT_CALL with return type VOID,
+                    // tac.op0 is null
+                    isDef = true;
+                }
+                break;
+            case LOAD_VTBL:
+            case DIRECT_CALL:
+            case RETURN:
+            case LOAD_STR_CONST:
+            case LOAD_IMM4:
+            /* def op0 */
+                if (tac.op0 != null) {  // in DIRECT_CALL with return type VOID,
+                    // tac.op0 is null
+                    isDef = true;
+                }
+                break;
+            case STORE:
+            /* use op0 and op1*/
+                isDef = false;
+                break;
+            case PARM:
+            /* use op0 */
+                isDef = false;
+                break;
+            default:
+            /* BRANCH MEMO MARK PARM*/
+                break;
+        }
+        return isDef;
     }
 
     public void printTo(PrintWriter pw) {

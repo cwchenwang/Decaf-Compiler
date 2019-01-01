@@ -31,6 +31,10 @@ public class FlowGraph implements Iterable<BasicBlock> {
         for (BasicBlock bb : bbs) {
             bb.analyzeLiveness();
         }
+        analyzeDUChain();
+        for (BasicBlock bb : bbs) {
+            bb.computeDUChain();
+        }
     }
 
     private void deleteMemo(Functy func) {
@@ -192,6 +196,42 @@ public class FlowGraph implements Iterable<BasicBlock> {
                 for (int i = 0; i < 2; i++) {
                     if (bb.next[i] >= 0) { // Not RETURN
                         bb.liveOut.addAll(bbs.get(bb.next[i]).liveIn);
+                    }
+                }
+            }
+        } while (changed);
+    }
+
+    public void analyzeDUChain() {
+        for (BasicBlock bb : bbs) {
+            bb.computeDefAndLiveUseDU();
+        }
+        boolean changed = true;
+        do {
+            changed = false;
+            for (BasicBlock bb : bbs) {
+                for (int i = 0; i < 2; i++) {
+                    if (bb.next[i] >= 0) { // Not RETURN
+                        bb.liveOutDU.addAll(bbs.get(bb.next[i]).liveInDU);
+                    }
+                }
+                // System.out.println(bb.liveOutDU)
+                // bb.liveOut.removeAll(bb.def);
+                Iterator it = bb.liveOutDU.iterator();
+                while(it.hasNext()) {
+                    Pair pair = (Pair)it.next();
+                    for(Pair p : bb.defDU) {
+                        if(p.tmp == pair.tmp && (pair.pos < bb.tacList.id || pair.pos > bb.endId)) {
+                            it.remove();
+                        }
+                    }
+                }
+
+                if (bb.liveInDU.addAll(bb.liveOutDU))
+                    changed = true;
+                for (int i = 0; i < 2; i++) {
+                    if (bb.next[i] >= 0) { // Not RETURN
+                        bb.liveOutDU.addAll(bbs.get(bb.next[i]).liveInDU);
                     }
                 }
             }
