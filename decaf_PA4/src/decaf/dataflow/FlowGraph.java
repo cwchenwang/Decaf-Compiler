@@ -33,6 +33,7 @@ public class FlowGraph implements Iterable<BasicBlock> {
         }
         analyzeDUChain();
         for (BasicBlock bb : bbs) {
+            bb.analyzeLivenessDU();
             bb.computeDUChain();
         }
     }
@@ -215,9 +216,7 @@ public class FlowGraph implements Iterable<BasicBlock> {
                         bb.liveOutDU.addAll(bbs.get(bb.next[i]).liveInDU);
                     }
                 }
-                // System.out.println(bb.liveOutDU)
-                // bb.liveOut.removeAll(bb.def);
-                Iterator it = bb.liveOutDU.iterator();
+                Iterator<Pair> it = bb.liveOutDU.iterator();
                 while(it.hasNext()) {
                     Pair pair = (Pair)it.next();
                     for(Pair p : bb.defDU) {

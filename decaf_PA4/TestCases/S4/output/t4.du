@@ -13,7 +13,7 @@ BASIC BLOCK 0 :
 FUNCTION _Main.tester : 
 BASIC BLOCK 0 : 
 10	_T7 = *(_T0 + 8) [ ]
-11	_T8 = 1 [ 13 21 ]
+11	_T8 = 1 [ 13 21 25 ]
 12	_T9 = 0 [ 13 ]
 13	_T10 = (_T8 < _T9) [ 14 ]
 14	END BY BEQZ, if _T10 = 
@@ -29,7 +29,7 @@ BASIC BLOCK 2 :
 21	_T13 = (_T12 * _T8) [ 22 ]
 22	_T14 = (_T12 + _T13) [ 23 27 29 ]
 23	parm _T14
-24	_T15 =  call _Alloc [ 25 ]
+24	_T15 =  call _Alloc [ 25 27 ]
 25	*(_T15 + 0) = _T8
 26	_T16 = 0 [ 32 ]
 27	_T15 = (_T15 + _T14) [ 31 34 ]
@@ -59,7 +59,7 @@ BASIC BLOCK 7 :
 44	_T21 = (_T20 * _T1) [ 45 ]
 45	_T22 = (_T20 + _T21) [ 46 50 52 ]
 46	parm _T22
-47	_T23 =  call _Alloc [ 48 ]
+47	_T23 =  call _Alloc [ 48 50 ]
 48	*(_T23 + 0) = _T1
 49	_T24 = 0 [ 55 ]
 50	_T23 = (_T23 + _T22) [ 54 57 ]
@@ -78,7 +78,7 @@ BASIC BLOCK 10 :
 FUNCTION _Main.start : 
 BASIC BLOCK 0 : 
 58	_T28 = 1 [ 59 ]
-59	_T25 = _T28 [ 62 65 70 79 ]
+59	_T25 = _T28 [ 62 65 70 79 85 ]
 60	END BY BRANCH, goto 1
 BASIC BLOCK 1 : 
 61	_T29 = 5 [ 62 ]
@@ -98,7 +98,7 @@ BASIC BLOCK 3 :
 71	_T35 = *(_T2 + 0) [ 72 ]
 72	_T36 = *(_T35 + 8) [ 73 ]
 73	_T37 =  call _T36 [ 74 ]
-74	_T27 = _T37 [ 89 102 123 138 ]
+74	_T27 = _T37 [ 89 102 107 110 123 125 138 145 ]
 75	END BY BRANCH, goto 5
 BASIC BLOCK 4 : 
 76	_T38 = "Loop " [ 77 ]
@@ -111,10 +111,10 @@ BASIC BLOCK 4 :
 83	call _PrintString
 84	_T40 = 1 [ 85 ]
 85	_T41 = (_T25 + _T40) [ 86 ]
-86	_T25 = _T41 [ 62 65 70 79 ]
+86	_T25 = _T41 [ 62 65 70 79 85 ]
 87	END BY BRANCH, goto 1
 BASIC BLOCK 5 : 
-88	_T42 = 0 [ 90 93 101 ]
+88	_T42 = 0 [ 90 93 101 106 ]
 89	_T43 = *(_T27 - 4) [ 90 ]
 90	_T44 = (_T42 < _T43) [ 91 ]
 91	END BY BEQZ, if _T44 = 

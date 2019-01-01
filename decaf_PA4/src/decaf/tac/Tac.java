@@ -1,7 +1,7 @@
 package decaf.tac;
 
 import java.util.Set;
-
+import decaf.dataflow.Pair;
 import decaf.utils.MiscUtils;
 
 public class Tac {
@@ -38,7 +38,7 @@ public class Tac {
 	public int bbNum;
 
 	public Set<Temp> liveOut;
-	
+	public Set<Pair> liveOutDU;	
 	public Set<Temp> saves;
 	
 	private static int allocateId() {

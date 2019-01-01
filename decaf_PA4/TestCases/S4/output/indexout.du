@@ -9,7 +9,7 @@ BASIC BLOCK 0 :
 
 FUNCTION main : 
 BASIC BLOCK 0 : 
-7	_T4 = 2 [ 9 17 ]
+7	_T4 = 2 [ 9 17 21 ]
 8	_T5 = 0 [ 9 ]
 9	_T6 = (_T4 < _T5) [ 10 ]
 10	END BY BEQZ, if _T6 = 
@@ -25,7 +25,7 @@ BASIC BLOCK 2 :
 17	_T9 = (_T8 * _T4) [ 18 ]
 18	_T10 = (_T8 + _T9) [ 19 23 25 ]
 19	parm _T10
-20	_T11 =  call _Alloc [ 21 ]
+20	_T11 =  call _Alloc [ 21 23 ]
 21	*(_T11 + 0) = _T4
 22	_T12 = 0 [ 28 ]
 23	_T11 = (_T11 + _T10) [ 27 30 ]
@@ -39,8 +39,8 @@ BASIC BLOCK 4 :
 28	*(_T11 + 0) = _T12
 29	END BY BRANCH, goto 3
 BASIC BLOCK 5 : 
-30	_T3 = _T11 [ 32 45 ]
-31	_T13 = 2 [ 33 36 44 ]
+30	_T3 = _T11 [ 32 45 50 ]
+31	_T13 = 2 [ 33 36 44 49 ]
 32	_T14 = *(_T3 - 4) [ 33 ]
 33	_T15 = (_T13 < _T14) [ 34 ]
 34	END BY BEQZ, if _T15 = 
