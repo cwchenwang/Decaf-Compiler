@@ -35,9 +35,13 @@ public class GraphColorRegisterAllocator implements RegisterAllocator {
 	public void alloc(BasicBlock bb) {
 		this.bb = bb;
 		clear();
-
 		// Use InferenceGraph to do basicblock-wise register allocation here.
 		// But before that, you have to do something.
+		InferenceGraph inferenceGraph = new InferenceGraph();
+		inferenceGraph.alloc(bb, regs, fp.reg);
+		for(Temp t : bb.liveUse) { //liveuse should be load after the regs are allocated
+			load(bb.tacList, t);
+		}
 
 		Tac tail = null;
 		for (Tac tac = bb.tacList; tac != null; tail = tac, tac = tac.next) {

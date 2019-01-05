@@ -18,10 +18,10 @@ import decaf.tac.Temp;
 class InferenceGraph {
 	public Set<Temp> nodes = new HashSet<>();
 	public Map<Temp, Set<Temp>> neighbours = new HashMap<>();
-	public Map<Temp, Integer> nodeDeg = new HashMap<>();
+	public Map<Temp, Integer> nodeDeg = new HashMap<>(); //The degree of a node
 	public BasicBlock bb;
 	public Register[] regs;
-	public Register fp;
+	public Register fp; //frame pointer
 	public Set<Temp> liveUseLoad = new HashSet<>();
 
 
@@ -169,24 +169,36 @@ class InferenceGraph {
 				case ADD: case SUB: case MUL: case DIV: case MOD:
 				case LAND: case LOR: case GTR: case GEQ: case EQU:
 				case NEQ: case LEQ: case LES:
-
+					
 				case NEG: case LNOT: case ASSIGN:
-
+					
 				case LOAD_VTBL: case LOAD_IMM4: case LOAD_STR_CONST:
-
+					
 				case INDIRECT_CALL:
-
 				case DIRECT_CALL:
+				case LOAD:
+					if(tac.op0 != null) {
+						for(Temp t : tac.liveOut) {
+							if(tac.op0 != t && neighbours.get(t) != null) {
+								addEdge(tac.op0, t);
+							}
+						}
+					}	
+					break;
 
 				case PARM:
-
-				case LOAD:
-
 				case STORE:
 					break;
 
 				case BRANCH: case BEQZ: case BNEZ: case RETURN:
 					throw new IllegalArgumentException();
+			}
+		}
+		for(Temp t1 : bb.liveUse) {
+			for(Temp t2 : bb.liveUse) {
+				if(!t1.equals(t2)) {
+					addEdge(t1, t2);
+				}
 			}
 		}
 	}
