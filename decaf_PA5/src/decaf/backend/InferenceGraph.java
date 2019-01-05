@@ -176,7 +176,7 @@ class InferenceGraph {
 					
 				case INDIRECT_CALL:
 				case DIRECT_CALL:
-				case LOAD:
+				case LOAD: //Add edges when the tac defines a variable
 					if(tac.op0 != null) {
 						for(Temp t : tac.liveOut) {
 							if(tac.op0 != t && neighbours.get(t) != null) {
@@ -194,9 +194,10 @@ class InferenceGraph {
 					throw new IllegalArgumentException();
 			}
 		}
+		//Remeber to add edges between liveuse elements 
 		for(Temp t1 : bb.liveUse) {
 			for(Temp t2 : bb.liveUse) {
-				if(!t1.equals(t2)) {
+				if(t1 != t2) {
 					addEdge(t1, t2);
 				}
 			}

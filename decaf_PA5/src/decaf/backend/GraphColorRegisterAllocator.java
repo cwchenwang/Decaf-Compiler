@@ -39,7 +39,8 @@ public class GraphColorRegisterAllocator implements RegisterAllocator {
 		// But before that, you have to do something.
 		InferenceGraph inferenceGraph = new InferenceGraph();
 		inferenceGraph.alloc(bb, regs, fp.reg);
-		for(Temp t : bb.liveUse) { //liveuse should be load after the regs are allocated
+		//liveuse should be load after the regs are allocated
+		for(Temp t : bb.liveUse) {
 			load(bb.tacList, t);
 		}
 
