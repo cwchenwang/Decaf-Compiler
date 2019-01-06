@@ -609,7 +609,7 @@ _L207:
           mul   $t2, $t1, $t2           
          Exception in thread "main" java.lang.NullPointerException
 	at decaf.backend.InferenceGraph.addEdge(InferenceGraph.java:69)
-	at decaf.backend.InferenceGraph.makeEdges(InferenceGraph.java:200)
+	at decaf.backend.InferenceGraph.makeEdges(InferenceGraph.java:201)
 	at decaf.backend.InferenceGraph.makeGraph(InferenceGraph.java:120)
 	at decaf.backend.InferenceGraph.alloc(InferenceGraph.java:42)
 	at decaf.backend.GraphColorRegisterAllocator.alloc(GraphColorRegisterAllocator.java:41)
